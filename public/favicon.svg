@@ -1,0 +1,13 @@
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .playfair {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: bold;
+      fill: #C7A34A;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+  </style>
+  <text x="24" y="28" class="playfair">iB</text>
+</svg>
