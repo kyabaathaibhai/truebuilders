@@ -28,11 +28,30 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Skip the commission. Connect with builders directly.',
-  description: 'Skip the commission. Connect with builders directly.',
-  keywords: 'Skip the commission. Connect with builders directly.',
-  authors: [{ name: 'Skip the commission. Connect with builders directly.' }],
-  viewport: 'width=device-width, initial-scale=1',
+  title: 'Skip broker commission. Connect directly with builders.',
+  description: 'Skip broker commission. Connect directly with builders.',
+  openGraph: {
+    title: 'Skip broker commission. Connect directly with builders.',
+    description: 'Skip broker commission. Connect directly with builders.',
+    url: 'https://truebuilders.vercel.app',
+    siteName: 'TrueBuilders',
+    images: [
+      {
+        url: 'https://truebuilders.vercel.app/favicon.svg', // 👈 upload an image here
+        width: 1200,
+        height: 630,
+        alt: 'Skip broker commission. Connect directly with builders.',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Skip broker commission. Connect directly with builders.',
+    description: 'Skip broker commission. Connect directly with builders.',
+    images: ['https://truebuilders.vercel.app/favicon.svg'],
+  },
   icons: {
     icon: '/favicon.svg',
   },

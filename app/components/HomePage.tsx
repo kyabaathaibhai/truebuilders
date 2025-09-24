@@ -19,6 +19,7 @@ import { ProjectService } from '@lib/ProjectService';
 import Autocomplete from 'react-autocomplete';
 import { useRouter } from 'next/navigation';
 import OTPVerificationModal from './OtpVerificationModal';
+import Loader from './Loader';
 
 function HomePage() {
   const router = useRouter();
@@ -160,18 +161,18 @@ function HomePage() {
         <section className='bg-gray-50 relative pt-16 pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
             <div className='text-center'>
-              <h1 className='text-4xl sm:text-7xl font-black md:!leading-[1.1] text-center text-balance text-carbon-800'>
+              <h1 className='text-4xl sm:text-6xl font-black md:!leading-[1.1] text-center text-balance text-carbon-800'>
                 <span className='inline'>Connect Directly with</span>
                 <span className='bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text inline h-auto'>
                   {' '}
                   Builders
                 </span>
+                <br />
                 <span className='inline'> for Best Rates</span>
               </h1>
               <p className='text-lg sm:text-xl text-carbon-750 text-center max-w-3xl mx-auto my-4 font-medium'>
-                Skip the middlemen. Get instant callbacks from top real estate
-                developers in India within 30 minutes. Find your dream home with
-                exclusive deals and transparent pricing.
+                Skip broker commission. Get instant callbacks directly from real
+                estate developers.
               </p>
 
               {/* Search Bar */}
@@ -199,7 +200,7 @@ function HomePage() {
                                   <div className='font-semibold text-gray-900 text-left'>
                                     {item.label}
                                   </div>
-                                  <div className='text-sm text-gray-600'>
+                                  <div className='text-sm text-gray-600 text-left'>
                                     {item.subtitle}
                                   </div>
                                 </div>
@@ -243,7 +244,7 @@ function HomePage() {
                           }}
                           inputProps={{
                             placeholder:
-                              'Search for builders or projects (e.g., DLF, Godrej Properties)',
+                              'Search for builders or projects (e.g., Prestige, Godrej Properties)',
                             className:
                               'w-full pl-12 pr-4 py-4 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                           }}
@@ -397,63 +398,69 @@ function HomePage() {
               </p>
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-              {projectData?.slice(0, 8)?.map((project: any, index: number) => (
-                <Link
-                  href={`/project/${project.id}`}
-                  key={index}
-                  className='bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer'
-                >
-                  <div className='relative'>
-                    <img
-                      src={project.hero_image}
-                      alt={project.name}
-                      className='w-full h-48 object-cover'
-                    />
-                    <div className='absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
-                      Callback in {project.callback_time} mins
-                    </div>
-                  </div>
+            {projectData?.length > 0 ? (
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+                {projectData
+                  ?.slice(0, 8)
+                  ?.map((project: any, index: number) => (
+                    <Link
+                      href={`/project/${project.id}`}
+                      key={index}
+                      className='bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer'
+                    >
+                      <div className='relative'>
+                        <img
+                          src={project.hero_image}
+                          alt={project.name}
+                          className='w-full h-48 object-cover'
+                        />
+                        <div className='absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
+                          Callback in {project.callback_time} mins
+                        </div>
+                      </div>
 
-                  <div className='p-6'>
-                    <h3 className='font-bold text-gray-900 mb-2'>
-                      {project.name}
-                    </h3>
-                    {/* <p className='text-sm text-gray-600 mb-2'>
+                      <div className='p-6'>
+                        <h3 className='font-bold text-gray-900 mb-2'>
+                          {project.name}
+                        </h3>
+                        {/* <p className='text-sm text-gray-600 mb-2'>
                   by {project.builder}
                 </p> */}
 
-                    <div className='flex items-center space-x-1 mb-3'>
-                      <MapPin className='h-4 w-4 text-gray-400' />
-                      <span className='text-sm text-gray-600'>
-                        {project.location_address}
-                      </span>
-                    </div>
-
-                    <div className='space-y-2 mb-4'>
-                      <div className='flex justify-between'>
-                        <span className='text-gray-600 text-sm'>
-                          Staring From
-                        </span>
-                        <span className='font-semibold text-sm'>
-                          {project.price_starting_from}
-                        </span>
-                      </div>
-                      <div className='flex flex-wrap gap-1 mb-3'>
-                        {project?.unit_types?.map((type: string) => (
-                          <span
-                            key={type}
-                            className='bg-[#c7a63d]/10 text-[#c7a63d] px-2 py-1 rounded-lg text-xs font-semibold border border-[#c7a63d]/30'
-                          >
-                            {type}
+                        <div className='flex items-center space-x-1 mb-3'>
+                          <MapPin className='h-4 w-4 text-gray-400' />
+                          <span className='text-sm text-gray-600'>
+                            {project.location_address}
                           </span>
-                        ))}
+                        </div>
+
+                        <div className='space-y-2 mb-2'>
+                          <div className='flex justify-between mb-4'>
+                            <span className='text-gray-600 text-sm'>
+                              Staring From
+                            </span>
+                            <span className='font-semibold text-sm'>
+                              {project.price_starting_from}
+                            </span>
+                          </div>
+                          <div className='flex flex-wrap gap-1 mb-3'>
+                            {project?.unit_types?.map((type: string) => (
+                              <span
+                                key={type}
+                                className='bg-[#c7a63d]/10 text-[#c7a63d] px-2 py-1 rounded-lg text-xs font-semibold border border-[#c7a63d]/30'
+                              >
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    </Link>
+                  ))}
+              </div>
+            ) : (
+              <Loader />
+            )}
           </div>
         </section>
 

@@ -18,9 +18,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  title = 'Get callback from TrueBuilders team',
+  title = 'Get callback from',
   projectId = 0,
   callBackTime = 30,
+  subtitle = 'TrueBuilders',
 }) => {
   const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [formData, setFormData] = useState({
@@ -142,7 +143,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white rounded-2xl p-8 max-w-md w-full relative'>
+      <div className='bg-white rounded-2xl p-8 max-w-2xl w-full relative'>
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -155,11 +156,11 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
         {step === 'form' && (
           <>
             <div className='text-center mb-6'>
-              <h3 className='text-2xl font-bold text-gray-900 mb-2'>{title}</h3>
-              <p className='text-gray-600'>
-                Enter your details to get a callback within {callBackTime}{' '}
-                minutes
-              </p>
+              <h3 className='text-4xl font-bold text-gray-900 mb-2'>{title}</h3>
+              <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+                {subtitle === 'TrueBuilders' ? 'TrueBuilders Team' : subtitle}
+              </h2>
+              <p className='text-gray-600'>in {callBackTime}mins</p>
             </div>
 
             <form onSubmit={handleFormSubmit} className='space-y-4'>
@@ -279,15 +280,13 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
         {/* Success Step */}
         {step === 'success' && (
           <div className='text-center'>
-            <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <CheckCircle className='h-8 w-8 text-green-600' />
+            <div className='w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <CheckCircle className='h-12 w-12 text-green-600' />
             </div>
-            <h3 className='text-2xl font-bold text-gray-900 mb-2'>
-              Successfully Verified!
-            </h3>
+
             <p className='text-gray-600 mb-6'>
-              Thank you for your interest. Our TrueBuilders team will get back
-              to you in {callBackTime} minutes.
+              Thank you for your interest. {subtitle} team will get back to you
+              in {callBackTime} minutes.
             </p>
             <div className='bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6'>
               We will contact you at{' '}

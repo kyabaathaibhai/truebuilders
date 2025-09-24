@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, ArrowLeft, Star } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import Logo from 'assets/Logo';
 import Link from 'next/link';
 import { BuilderService } from '@lib/BuilderService';
 import Loader from './Loader';
+import Image from 'next/image';
 
 function BuilderDetailsPage({ builderId }) {
   const [builderData, setBuilderData] = useState<any>(null);
@@ -23,7 +24,7 @@ function BuilderDetailsPage({ builderId }) {
   }, [builderId]);
 
   if (!builderData) {
-    <Loader />;
+    return <Loader />;
   }
 
   // Home Page (existing code)
@@ -35,15 +36,14 @@ function BuilderDetailsPage({ builderId }) {
           <div className='flex justify-between items-center h-16'>
             <div className='flex items-center'>
               <Link
-                className='mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors'
+                className='mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2'
                 href='/'
               >
-                <ArrowLeft className='h-5 w-5 text-gray-600' />
+                <Logo />
+                <span className='text-2xl font-bold text-gray-900'>
+                  TrueBuilders
+                </span>
               </Link>
-              <Logo />
-              <span className='text-2xl font-bold text-gray-900'>
-                TrueBuilders
-              </span>
             </div>
           </div>
         </div>
@@ -60,20 +60,6 @@ function BuilderDetailsPage({ builderId }) {
               <h1 className='text-3xl font-bold text-gray-900 mb-2'>
                 {builderData?.name}
               </h1>
-              {/* <div className='flex items-center space-x-4 mb-4'> */}
-              {/* <div className='flex items-center space-x-1'>
-                  <Star className='h-5 w-5 text-yellow-400 fill-current' />
-                  <span className='font-semibold'>{builderData?.rating}</span>
-                </div> */}
-              {/* <span className='text-gray-400'>•</span>
-                <span className='text-gray-600'>
-                  Est. {builderData?.established}
-                </span> */}
-              {/* <span className='text-gray-400'>•</span>
-                <span className='text-gray-600'>
-                  {builderData?.headquarters}
-                </span> */}
-              {/* </div> */}
               <p className='text-gray-600 leading-relaxed mb-6'>
                 {builderData?.description}
               </p>
@@ -120,10 +106,13 @@ function BuilderDetailsPage({ builderId }) {
                 className='bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer'
               >
                 <div className='relative'>
-                  <img
+                  <Image
                     src={project.hero_image}
                     alt={project.name}
                     className='w-full h-48 object-cover'
+                    width={100}
+                    height={100}
+                    unoptimized
                   />
                   <div className='absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
                     Callback in {project.callback_time} mins
