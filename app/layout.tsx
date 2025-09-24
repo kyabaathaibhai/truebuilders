@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Poppins, Manrope } from 'next/font/google';
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
+import AppInit from '@lib/AppInit';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,10 +28,10 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Real Estate Platform',
-  description: 'Premium real estate projects and developments',
-  keywords: 'luxury real estate, premium properties, real estate development',
-  authors: [{ name: 'Luxury Real Estate' }],
+  title: 'Skip the commission. Connect with builders directly.',
+  description: 'Skip the commission. Connect with builders directly.',
+  keywords: 'Skip the commission. Connect with builders directly.',
+  authors: [{ name: 'Skip the commission. Connect with builders directly.' }],
   viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: '/favicon.svg',
@@ -48,7 +49,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${poppins.variable} ${manrope.variable}`}
     >
       <body className={`${inter.className} min-h-screen bg-[#f5f6f8]`}>
-        {children}
+        <AppInit>{children}</AppInit>
       </body>
     </html>
   );

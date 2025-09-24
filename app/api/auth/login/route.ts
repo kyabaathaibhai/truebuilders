@@ -7,7 +7,7 @@ export async function POST() {
         "password": "Bonji456Tr@1234-PROD-SECURETY"
     };
 
-    const res = await fetch("http://api.truebuilders.in/api/admin/login", {
+    const res = await fetch( `https://api.truebuilders.in/api/admin/login?nonce=${Date.now()}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
