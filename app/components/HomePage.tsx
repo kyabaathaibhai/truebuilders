@@ -168,7 +168,7 @@ function HomePage() {
                   Builders
                 </span>
                 <br />
-                <span className='inline'> for Best Rates</span>
+                <span className='inline'> in 30mins</span>
               </h1>
               <p className='text-lg sm:text-xl text-carbon-750 text-center max-w-3xl mx-auto my-4 font-medium'>
                 Skip broker commission. Get instant callbacks directly from real
