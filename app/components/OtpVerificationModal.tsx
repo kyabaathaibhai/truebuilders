@@ -23,7 +23,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   callBackTime = 30,
   subtitle = 'TrueBuilders',
 }) => {
-  const [step, setStep] = useState<'form' | 'otp' | 'success'>('success');
+  const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [formData, setFormData] = useState({
     name: '',
     phoneNumber: '',
