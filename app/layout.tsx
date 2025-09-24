@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: 'TrueBuilders',
     images: [
       {
-        url: 'https://truebuilders.vercel.app/favicon.svg', // 👈 upload an image here
+        url: 'https://truebuilders.vercel.app/og-image.png', // 👈 upload an image here
         width: 1200,
         height: 630,
         alt: 'Skip broker commission. Connect directly with builders.',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Skip broker commission. Connect directly with builders.',
     description: 'Skip broker commission. Connect directly with builders.',
-    images: ['https://truebuilders.vercel.app/favicon.svg'],
+    images: ['https://truebuilders.vercel.app/og-image.png'],
   },
   icons: {
     icon: '/favicon.svg',
