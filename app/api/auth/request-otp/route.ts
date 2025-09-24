@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const res = await fetch("http://api.truebuilders.in/api/auth/request-otp", {
+    const res = await fetch( `https://api.truebuilders.in/api/auth/request-otp?nonce=${Date.now()}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,6 +20,8 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify(body),
     });
+
+
 
     const data = await res.json();
 
@@ -32,6 +34,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data);
   } catch (error: any) {
+    console.log("error--------->",error)
     return NextResponse.json(
       { error: error.message || "Server error" },
       { status: 500 }

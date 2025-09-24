@@ -1254,3 +1254,10 @@ html {
     background: linear-gradient(135deg, #B8943E, #D4AF37);
   }
 }
+
+
+.google-signin-button {
+  background: radial-gradient(99.34% 118.33% at 47.79% 5%, #3f20fb 0, #b377ff 100%);
+  transition: box-shadow .4s, scale .4s, background-color .4s;
+  box-shadow: 0 0 calc(var(--active) * 32px) rgba(78, 16, 255, .7);
+}

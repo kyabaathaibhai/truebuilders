@@ -24,6 +24,7 @@ const api: AxiosInstance = axios.create({
   timeout: 30000, // Increased timeout to 30 seconds
   headers: {
     'Content-Type': 'application/json',
+    "Authorization":  `Bearer ${typeof window !== "undefined"? localStorage.getItem("token"):null}`
   },
   // Add keep-alive and connection reuse
   httpAgent: typeof window === 'undefined' ? require('http').Agent({ keepAlive: true }) : undefined,
@@ -34,7 +35,7 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -124,12 +125,12 @@ const withRetry = async <T>(
 export const apiService = {
   // GET request
   get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return withRetry(() => api.get<T>(url, config));
+    return api.get<T>(url, config);
   },
 
   // POST request
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return withRetry(() => api.post<T>(url, data, config));
+    return api.post<T>(url, data, config);
   },
 
   // PUT request

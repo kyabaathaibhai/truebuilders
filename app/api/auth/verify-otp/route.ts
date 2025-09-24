@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const res = await fetch("http://api.truebuilders.in/api/auth/verify-otp", {
+    const res = await fetch(`https://api.truebuilders.in/api/auth/verify-otp?nonce=${Date.now()}` ,  {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
