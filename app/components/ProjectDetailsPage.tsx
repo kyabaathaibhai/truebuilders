@@ -76,15 +76,15 @@ export default function ProjectDetailsPage({ projectId }) {
             <div className='flex justify-between items-center h-16'>
               <div className='flex items-center'>
                 <Link
-                  className='mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2'
                   href='/'
                 >
-                  <ArrowLeft className='h-5 w-5 text-gray-600' />
+                  {' '}
+                  <Logo />
+                  <span className='text-2xl font-bold text-gray-900'>
+                    TrueBuilders
+                  </span>{' '}
                 </Link>
-                <Logo />
-                <span className='text-2xl font-bold text-gray-900'>
-                  TrueBuilders
-                </span>
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function ProjectDetailsPage({ projectId }) {
               >
                 Get Callback from Builder
               </button>
-              <div className='bg-white border border-gray-200 rounded-xl p-6 sticky top-24'>
+              <div className='bg-white border border-gray-200 rounded-xl p-6'>
                 <div className='text-3xl font-bold text-gray-900 mb-6'>
                   {projectData?.project_snapshot?.price_starting_from}
                 </div>
@@ -200,16 +200,43 @@ export default function ProjectDetailsPage({ projectId }) {
                     {projectData?.project_snapshot?.rera_status || 'NA'}
                   </span>
                 </div>
-                <div className='flex flex-wrap gap-1 mb-3'>
-                  {projectData?.unit_types?.map((type: string) => (
-                    <span
-                      key={type}
-                      className='bg-[#c7a63d]/10 text-[#c7a63d] px-2 py-1 rounded-lg text-xs font-semibold border border-[#c7a63d]/30'
-                    >
-                      {type}
-                    </span>
-                  ))}
+                <div className='flex justify-between mb-6 gap-3 ext-right'>
+                  <span className='text-gray-600 w-1/2'>Configuration</span>
+                  <div className='flex flex-wrap gap-1 mb-3 justify-end'>
+                    {projectData?.unit_types?.map((type: string) => (
+                      <span
+                        key={type}
+                        className='bg-[#c7a63d]/10 text-[#c7a63d] px-2 py-1 rounded-lg text-xs font-semibold border border-[#c7a63d]/30'
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+              </div>
+              <div className='bg-white border border-gray-200 rounded-xl p-6 h-[300px] relative'>
+                <iframe
+                  title='Google Map'
+                  src={
+                    projectData?.location_advantage?.map_url + '&output=embed'
+                  }
+                  width='100%'
+                  height='100%'
+                  style={{ border: 0, pointerEvents: 'none' }}
+                  loading='lazy'
+                  referrerPolicy='no-referrer-when-downgrade'
+                ></iframe>
+                <div
+                  className='absolute inset-0 cursor-pointer'
+                  title='Open in Google Maps'
+                  onClick={() =>
+                    window.open(
+                      projectData?.location_advantage?.map_url,
+                      '_blank'
+                    )
+                  }
+                  style={{ background: 'rgba(0,0,0,0)', zIndex: 2 }}
+                />
               </div>
             </div>
           </div>
@@ -219,7 +246,8 @@ export default function ProjectDetailsPage({ projectId }) {
         <OTPVerificationModal
           isOpen={showVerificationModal}
           onClose={handleVerificationModal}
-          title={`Get Callback for ${projectData?.name}`}
+          title='Get Callback for'
+          subtitle={projectData?.name}
           callBackTime={projectData?.callback_time}
         />
       )}
