@@ -163,7 +163,7 @@ function HomePage() {
         </header>
 
         {/* Hero Section */}
-        <section className='bg-gray-50 relative pt-16 pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
+        <section className='bg-[#f5f5f7] relative pt-16 pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
             <div className='text-center'>
               <h1 className='text-4xl sm:text-6xl font-black text-center text-balance text-carbon-800'>
@@ -175,7 +175,7 @@ function HomePage() {
                 <br />
                 <span className='inline text-2xl sm:text-5xl'> in 30mins</span>
               </h1>
-              <p className='text-lg sm:text-xl text-carbon-750 text-center max-w-3xl mx-auto my-4 font-medium'>
+              <p className='text-md sm:text-lg text-carbon-750 text-center max-w-3xl mx-auto my-4 font-normal'>
                 Skip broker commission. Get instant callbacks directly from real
                 estate developers.
               </p>
@@ -290,7 +290,7 @@ function HomePage() {
               </div>
             </div>
           </div>
-          <div className='absolute inset-0 top-0 md:-top-[200px] blur-[48px] z-0 '>
+          {/* <div className='absolute inset-0 top-0 md:-top-[200px] blur-[48px] z-0 '>
             <svg
               viewBox='0 0 1440 914'
               fill='none'
@@ -342,7 +342,7 @@ function HomePage() {
                 </linearGradient>
               </defs>
             </svg>
-          </div>
+          </div> */}
         </section>
 
         {/* Top Builders Section */}
