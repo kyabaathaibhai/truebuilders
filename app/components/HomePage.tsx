@@ -89,10 +89,11 @@ function HomePage() {
     fetchProjectList();
   }, []);
 
-  const handleAutocompleteSelect = (selectedValue, item) => {
+  const handleAutocompleteSelect = (selectedValue: any, item: any) => {
+    if (!item || !item.id) return; // safeguard
+
     setValue(selectedValue);
 
-    // Redirect based on type
     if (item.type === 'builder') {
       router.push(`/builder/${item.id}`);
     } else if (item.type === 'project') {
@@ -111,6 +112,10 @@ function HomePage() {
   const handleVerificationModal = () => {
     setShowVerificationModal((prev) => !prev);
   };
+
+  if (builderData.length === 0 && projectData.length === 0) {
+    return <Loader />;
+  }
 
   // Home Page (existing code)
   return (
@@ -161,14 +166,14 @@ function HomePage() {
         <section className='bg-gray-50 relative pt-16 pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
             <div className='text-center'>
-              <h1 className='text-4xl sm:text-6xl font-black md:!leading-[1.1] text-center text-balance text-carbon-800'>
+              <h1 className='text-4xl sm:text-6xl font-black text-center text-balance text-carbon-800'>
                 <span className='inline'>Connect Directly with</span>
                 <span className='bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text inline h-auto'>
                   {' '}
                   Builders
                 </span>
                 <br />
-                <span className='inline'> in 30mins</span>
+                <span className='inline text-2xl sm:text-5xl'> in 30mins</span>
               </h1>
               <p className='text-lg sm:text-xl text-carbon-750 text-center max-w-3xl mx-auto my-4 font-medium'>
                 Skip broker commission. Get instant callbacks directly from real
