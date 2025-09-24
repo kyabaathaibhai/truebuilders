@@ -249,6 +249,7 @@ export default function ProjectDetailsPage({ projectId }) {
           title='Get Callback for'
           subtitle={projectData?.name}
           callBackTime={projectData?.callback_time}
+          projectId={projectData?.id}
         />
       )}
     </>
