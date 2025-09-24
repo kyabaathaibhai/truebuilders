@@ -23,7 +23,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   callBackTime = 30,
   subtitle = 'TrueBuilders',
 }) => {
-  const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
+  const [step, setStep] = useState<'form' | 'otp' | 'success'>('success');
   const [formData, setFormData] = useState({
     name: '',
     phoneNumber: '',
@@ -156,8 +156,8 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
         {step === 'form' && (
           <>
             <div className='text-center mb-6'>
-              <h3 className='text-4xl font-bold text-gray-900 mb-2'>{title}</h3>
-              <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+              <h3 className='text-2xl font-bold text-gray-900 mb-2'>{title}</h3>
+              <h2 className='text-4xl font-semibold text-gray-900 mb-2'>
                 {subtitle === 'TrueBuilders' ? 'TrueBuilders Team' : subtitle}
               </h2>
               <p className='text-gray-600'>in {callBackTime}mins</p>
@@ -211,7 +211,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 disabled={loading}
                 className='w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                {loading ? 'Sending OTP...' : 'Request OTP'}
+                {loading ? 'Sending OTP...' : 'Proceed'}
               </button>
             </form>
           </>
@@ -287,6 +287,9 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
             <p className='text-gray-600 mb-6'>
               Thank you for your interest. {subtitle} team will get back to you
               in {callBackTime} minutes.
+            </p>
+            <p className='text-gray-600 mb-3 font-bold'>
+              Working hours (10am - 6pm)
             </p>
             <div className='bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6'>
               We will contact you at{' '}

@@ -130,7 +130,7 @@ export default function ProjectDetailsPage({ projectId }) {
                   <div className='flex items-center space-x-4 text-sm text-gray-500 mb-4'>
                     <div className='flex items-center space-x-1'>
                       <MapPin className='h-4 w-4' />
-                      <span>{projectData?.location_advantage?.location}</span>
+                      <span>{projectData?.location_address}</span>
                     </div>
                   </div>
                 </div>
