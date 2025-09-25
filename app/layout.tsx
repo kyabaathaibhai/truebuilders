@@ -4,6 +4,7 @@ import { Inter, Playfair_Display, Poppins, Manrope } from 'next/font/google';
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import AppInit from '@lib/AppInit';
+import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -67,6 +68,20 @@ export default function RootLayout({
       lang='en'
       className={`${inter.variable} ${playfair.variable} ${poppins.variable} ${manrope.variable}`}
     >
+      <head>
+        <Script
+          src='https://www.googletagmanager.com/gtag/js?id=AW-17596023719'
+          strategy='afterInteractive'
+        />
+        <Script id='google-analytics' strategy='afterInteractive'>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17596023719');
+          `}
+        </Script>
+      </head>
       <body className={`${inter.className} min-h-screen bg-[#f5f6f8]`}>
         <AppInit>{children}</AppInit>
       </body>
