@@ -23,9 +23,11 @@ function BuilderDetailsPage({ builderId }) {
     if (builderId) fetchBuilderDetails();
   }, [builderId]);
 
-  if (!builderData) {
+  if (builderData === null) {
     return <Loader />;
   }
+
+  console.log({ builderData }, 'builderData');
 
   // Home Page (existing code)
   return (
@@ -101,32 +103,35 @@ function BuilderDetailsPage({ builderId }) {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
             {builderData?.projects?.map((project: any, index: any) => (
               <Link
-                href={`/project/${project.id}`}
+                href={`/project/${project?.id}`}
                 key={index}
                 className='bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer'
               >
                 <div className='relative'>
                   <Image
-                    src={project.hero_image}
-                    alt={project.name}
+                    src={
+                      project?.hero_image ||
+                      'https://realestatebrokerimage.s3.us-east-1.amazonaws.com/Bangalore+Projects/Godrej+Thanisandra/thanisandrahero_.webp'
+                    }
+                    alt={project?.name}
                     className='w-full h-48 object-cover'
                     width={100}
                     height={100}
                     unoptimized
                   />
                   <div className='absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
-                    Callback in {project.callback_time} mins
+                    Callback in {project?.callback_time} mins
                   </div>
                 </div>
 
                 <div className='p-4'>
                   <h3 className='font-bold text-gray-900 mb-2'>
-                    {project.name}
+                    {project?.name}
                   </h3>
                   <div className='flex items-center space-x-1 mb-3'>
                     <MapPin className='h-4 w-4 text-gray-400' />
                     <span className='text-sm text-gray-600'>
-                      {project.location_address}
+                      {project?.location_address}
                     </span>
                   </div>
 
@@ -136,7 +141,7 @@ function BuilderDetailsPage({ builderId }) {
                         Staring From
                       </span>
                       <span className='font-semibold text-xs'>
-                        {project.price_starting_from}
+                        {project?.price_starting_from}
                       </span>
                     </div>
                     <div className='flex flex-wrap gap-1 mb-3'>
