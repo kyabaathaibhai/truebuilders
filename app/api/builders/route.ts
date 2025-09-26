@@ -10,7 +10,7 @@ export async function GET(req: Request) {
         { status: 401 }
       );
     }
-    const res = await fetch(`https://api.truebuilders.in/api/builders?nonce=${Date.now()}`, {
+    const res = await fetch(`https://api.truebuilders.co.in/api/builders?nonce=${Date.now()}`, {
       method: 'GET',
       headers: {
         Authorization: authHeader,
