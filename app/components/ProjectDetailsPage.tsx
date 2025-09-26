@@ -20,6 +20,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import OTPVerificationModal from './OtpVerificationModal';
 import Loader from './Loader';
+import { event } from '@lib/gtag';
 
 const getAmenityIcon = (amenity: string) => {
   switch (amenity.toLowerCase()) {
@@ -49,6 +50,10 @@ export default function ProjectDetailsPage({ projectId }) {
     useState<boolean>(false);
   const handleVerificationModal = () => {
     setShowVerificationModal((prev) => !prev);
+    event({
+      action: 'get_callback_cta_clicked',
+      project_id: projectId,
+    });
   };
   async function fetchBuilderDetails() {
     try {
