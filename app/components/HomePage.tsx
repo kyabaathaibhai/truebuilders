@@ -305,7 +305,7 @@ function HomePage({ isLanding = true }: Props) {
         {/* Hero Section */}
         <section className='bg-[#f5f5f7] relative pt-8 md:pt-16 pb-12 md:pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
-            <div className='flex flex-col lg:flex-row gap-4 md:gap-8 lg:gap-5 items-center'>
+            <div className='flex flex-col lg:flex-row gap-4 items-center'>
               <div className='text-center lg:text-left flex-1 lg:flex-[3] w-full'>
                 {isLanding ? (
                   <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black text-center lg:text-left text-balance text-carbon-800'>
@@ -345,19 +345,19 @@ function HomePage({ isLanding = true }: Props) {
                 <div className='flex flex-wrap justify-start gap-3 justify-center md:justify-start'>
                   <div className='flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full'>
                     <Shield className='h-5 w-5' />
-                    <span className='font-medium text-xs md:text-base'>
+                    <span className='font-medium text-xs md:text-sm'>
                       Zero data sharing
                     </span>
                   </div>
                   <div className='flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full'>
                     <Award className='h-5 w-5' />
-                    <span className='font-medium text-xs md:text-base'>
+                    <span className='font-medium text-xs md:text-sm'>
                       GDPR compliant
                     </span>
                   </div>
                   <div className='flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full'>
                     <Users className='h-5 w-5' />
-                    <span className='font-medium text-xs md:text-base'>
+                    <span className='font-medium text-xs md:text-sm'>
                       No brokers in the loop
                     </span>
                   </div>
