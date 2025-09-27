@@ -33,6 +33,7 @@ function HomePage({ isLanding = true }: Props) {
   const [projectData, setProjectData] = useState<any>([]);
   const [autocompleteData, setAutocompleteData] = useState<any>([]);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [value, setValue] = useState('');
 
   // Form states
   const [formStep, setFormStep] = useState<'form' | 'otp' | 'success'>('form');
@@ -40,6 +41,7 @@ function HomePage({ isLanding = true }: Props) {
     name: '',
     phoneNumber: '',
     projectName: '',
+    project_id: -1,
   });
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -109,7 +111,9 @@ function HomePage({ isLanding = true }: Props) {
 
   const handleAutocompleteSelect = (selectedValue: any, item: any) => {
     if (!item) return;
-    handleInputChange('projectName', selectedValue);
+    setValue(selectedValue);
+    handleInputChange('projectName', item.label);
+    handleInputChange('project_id', item.id);
   };
 
   const filterAutocompleteItems = (items: any[], value: string) => {
@@ -122,7 +126,7 @@ function HomePage({ isLanding = true }: Props) {
     // If user has typed something and no matches found, add custom option
     if (value.trim() && filteredItems.length === 0) {
       filteredItems.push({
-        id: 'custom',
+        id: -1,
         label: value.trim(),
         type: 'custom',
         subtitle: 'Select this to proceed with your input',
@@ -150,12 +154,14 @@ function HomePage({ isLanding = true }: Props) {
     setError('');
 
     try {
-      await OtpService.requestOtp({
+      let payload = {
         name: formData.name,
         phone_number: formData.phoneNumber,
-        project_id: -1,
+        project_id: formData['project_id'],
         user_input: formData.projectName,
-      });
+      };
+
+      await OtpService.requestOtp(payload);
       setFormStep('otp');
       setResendTimer(60);
       setCanResend(false);
@@ -196,7 +202,7 @@ function HomePage({ isLanding = true }: Props) {
       const response = await OtpService.verifyOtp({
         phone_number: formData.phoneNumber,
         otp: otp,
-        project_id: -1,
+        project_id: formData['project_id'],
         user_input: formData.projectName,
       });
 
@@ -236,7 +242,7 @@ function HomePage({ isLanding = true }: Props) {
 
     event({
       action: 'get_callback_cta_clicked',
-      project_id: -1,
+      project_id: formData['project_id'],
     });
 
     requestOTP();
@@ -260,7 +266,7 @@ function HomePage({ isLanding = true }: Props) {
 
   const resetForm = () => {
     setFormStep('form');
-    setFormData({ name: '', phoneNumber: '', projectName: '' });
+    setFormData({ name: '', phoneNumber: '', projectName: '', project_id: -1 });
     setOtp('');
     setError('');
     setLoading(false);
@@ -459,7 +465,7 @@ function HomePage({ isLanding = true }: Props) {
                                 getItemValue={(item: any) => item.label}
                                 items={filterAutocompleteItems(
                                   autocompleteData,
-                                  formData.projectName
+                                  value
                                 )}
                                 renderItem={(
                                   item: any,
@@ -524,15 +530,10 @@ function HomePage({ isLanding = true }: Props) {
                                   className:
                                     'w-full pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                                 }}
-                                value={formData.projectName}
+                                value={value}
                                 onChange={(
                                   e: React.ChangeEvent<HTMLInputElement>
-                                ) =>
-                                  setFormData({
-                                    ...formData,
-                                    projectName: e.target.value,
-                                  })
-                                }
+                                ) => setValue(e.target.value)}
                                 onSelect={handleAutocompleteSelect}
                                 menuStyle={{}}
                               />
