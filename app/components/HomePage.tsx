@@ -308,8 +308,8 @@ function HomePage({ isLanding = true }: Props) {
             <div className='flex flex-col lg:flex-row gap-4 md:gap-8 lg:gap-5 items-center'>
               <div className='text-center lg:text-left flex-1 lg:flex-[3] w-full'>
                 {isLanding ? (
-                  <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black text-center lg:text-left text-balance text-carbon-800'>
-                    <span className='inline leading-[1.3]'>Still paying</span>
+                  <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black text-center lg:text-left text-balance text-carbon-800'>
+                    <span className='block leading-[1.3]'>Still paying</span>
                     <span className='bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text inline h-auto'>
                       {' '}
                       5% premium
@@ -317,7 +317,7 @@ function HomePage({ isLanding = true }: Props) {
                     </span>
                   </h1>
                 ) : (
-                  <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black text-center lg:text-left text-balance text-carbon-800'>
+                  <h1 className='text-3xl sm:text-4xl lg:text-5xl font-black text-center lg:text-left text-balance text-carbon-800'>
                     <span className='inline leading-[1.3]'>
                       Not able to connect
                     </span>
@@ -369,8 +369,9 @@ function HomePage({ isLanding = true }: Props) {
                 {/* Form Step */}
                 {formStep === 'form' && (
                   <>
-                    <h2 className='text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center'>
-                      Get callback from builder in 30mins
+                    <h2 className='text-2xl font-bold text-gray-900 mb-6 sm:mb-8 text-center'>
+                      Get callback from builder in <br />
+                      30mins
                     </h2>
 
                     <form onSubmit={handleFormSubmit} className='space-y-6'>
@@ -538,10 +539,11 @@ function HomePage({ isLanding = true }: Props) {
                         Verify Your Phone
                       </h3>
                       <p className='text-sm sm:text-base text-gray-600'>
-                        We've sent a 6-digit OTP to <br />
+                        {/* We've sent a 6-digit OTP to <br />
                         <span className='font-semibold'>
                           {formData.phoneNumber}
-                        </span>
+                        </span> */}
+                        OTP has been sent on your Whatsapp number
                       </p>
                     </div>
 
