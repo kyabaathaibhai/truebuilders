@@ -19,7 +19,6 @@ import { BuilderService } from '@lib/BuilderService';
 import Image from 'next/image';
 import { ProjectService } from '@lib/ProjectService';
 import Autocomplete from 'react-autocomplete';
-import { useRouter } from 'next/navigation';
 import { OtpService } from '@lib/OtpService';
 import Loader from './Loader';
 import OTPVerificationModal from './OtpVerificationModal';
@@ -30,7 +29,6 @@ interface Props {
 }
 
 function HomePage({ isLanding = true }: Props) {
-  const router = useRouter();
   const [builderData, setBuilderData] = useState<any>([]);
   const [projectData, setProjectData] = useState<any>([]);
   const [autocompleteData, setAutocompleteData] = useState<any>([]);
@@ -109,23 +107,38 @@ function HomePage({ isLanding = true }: Props) {
   }, []);
 
   const handleAutocompleteSelect = (selectedValue: any, item: any) => {
-    if (!item || !item.id) return; // safeguard
+    if (!item) return;
 
-    setValue(selectedValue);
+    handleInputChange('projectName', selectedValue);
+    if (item.type === 'custom') {
+      console.log('User entered custom value:', selectedValue);
+      setValue(selectedValue);
+      return;
+    }
 
-    if (item.type === 'builder') {
-      router.push(`/builder/${item.id}`);
-    } else if (item.type === 'project') {
-      router.push(`/project/${item.id}`);
+    if (item.id) {
+      setValue(selectedValue);
     }
   };
 
-  const filterAutocompleteItems = (items, value) => {
-    return items.filter(
+  const filterAutocompleteItems = (items: any[], value: string) => {
+    const filteredItems = items.filter(
       (item) =>
         item.label.toLowerCase().includes(value.toLowerCase()) ||
         item.subtitle.toLowerCase().includes(value.toLowerCase())
     );
+
+    // If user has typed something and no matches found, add custom option
+    if (value.trim() && filteredItems.length === 0) {
+      filteredItems.push({
+        id: 'custom',
+        label: value.trim(),
+        type: 'custom',
+        subtitle: 'Select this to proceed with your input',
+      });
+    }
+
+    return filteredItems;
   };
 
   // Form handler functions
@@ -141,13 +154,12 @@ function HomePage({ isLanding = true }: Props) {
     if (error) setError(''); // Clear error when user starts typing
   };
 
-  // API call to request OTP
   const requestOTP = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const response = await OtpService.requestOtp({
+      await OtpService.requestOtp({
         name: formData.name,
         phone_number: formData.phoneNumber,
         project_id: -1,
@@ -164,7 +176,6 @@ function HomePage({ isLanding = true }: Props) {
     }
   };
 
-  // API call to verify OTP
   const verifyOTP = async () => {
     setLoading(true);
     setError('');
@@ -294,7 +305,7 @@ function HomePage({ isLanding = true }: Props) {
         {/* Hero Section */}
         <section className='bg-[#f5f5f7] relative pt-8 md:pt-16 pb-12 md:pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
-            <div className='flex flex-col lg:flex-row gap-8 lg:gap-5 items-center'>
+            <div className='flex flex-col lg:flex-row gap-4 md:gap-8 lg:gap-5 items-center'>
               <div className='text-center lg:text-left flex-1 lg:flex-[3] w-full'>
                 {isLanding ? (
                   <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black text-center lg:text-left text-balance text-carbon-800'>
@@ -330,105 +341,25 @@ function HomePage({ isLanding = true }: Props) {
                   real estate developers.
                 </p>
 
-                {/* Search Bar */}
-                {isLanding === true && (
-                  <div className='max-w-4xl mx-auto mb-8 md:mb-12 mt-6'>
-                    <div className='bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100'>
-                      <div className='flex flex-col md:flex-row gap-4'>
-                        <div className='flex-1 relative'>
-                          <div className='relative'>
-                            <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10' />
-                            <Autocomplete
-                              getItemValue={(item) => item.label}
-                              items={filterAutocompleteItems(
-                                autocompleteData,
-                                value
-                              )}
-                              renderItem={(item, isHighlighted) => (
-                                <div
-                                  key={`${item.type}-${item.id}`}
-                                  className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
-                                    isHighlighted ? 'bg-blue-50' : 'bg-white'
-                                  } hover:bg-blue-50`}
-                                >
-                                  <div className='flex items-center justify-between'>
-                                    <div>
-                                      <div className='font-semibold text-gray-900 text-left'>
-                                        {item.label}
-                                      </div>
-                                      <div className='text-sm text-gray-600 text-left'>
-                                        {item.subtitle}
-                                      </div>
-                                    </div>
-                                    <div
-                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        item.type === 'builder'
-                                          ? 'bg-blue-100 text-blue-800'
-                                          : 'bg-green-100 text-green-800'
-                                      }`}
-                                    >
-                                      {item.type === 'builder'
-                                        ? 'Builder'
-                                        : 'Project'}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                              renderMenu={(items, value, style) => {
-                                return items.length > 0 || value ? (
-                                  <div
-                                    className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
-                                    style={{ top: '100%' }}
-                                  >
-                                    {items.length === 0 && value ? (
-                                      <div className='p-4 text-gray-500 text-center'>
-                                        No results found for "{value}"
-                                      </div>
-                                    ) : (
-                                      items
-                                    )}
-                                  </div>
-                                ) : null;
-                              }}
-                              wrapperStyle={{
-                                position: 'relative',
-                                display: 'block',
-                                width: '100%',
-                              }}
-                              wrapperProps={{
-                                className: 'relative w-full',
-                              }}
-                              inputProps={{
-                                placeholder:
-                                  'Search for builders or projects',
-                                className:
-                                  'w-full pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                              }}
-                              value={value}
-                              onChange={(e) => setValue(e.target.value)}
-                              onSelect={handleAutocompleteSelect}
-                              menuStyle={{}}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Trust Indicators as Chips */}
-                <div className='flex flex-wrap justify-start gap-3'>
+                <div className='flex flex-wrap justify-start gap-3 justify-center md:justify-start'>
                   <div className='flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full'>
                     <Shield className='h-5 w-5' />
-                    <span className='font-medium'>Zero data sharing</span>
+                    <span className='font-medium text-xs md:text-base'>
+                      Zero data sharing
+                    </span>
                   </div>
                   <div className='flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full'>
                     <Award className='h-5 w-5' />
-                    <span className='font-medium'>GDPR compliant</span>
+                    <span className='font-medium text-xs md:text-base'>
+                      GDPR compliant
+                    </span>
                   </div>
                   <div className='flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full'>
                     <Users className='h-5 w-5' />
-                    <span className='font-medium'>No brokers in the loop</span>
+                    <span className='font-medium text-xs md:text-base'>
+                      No brokers in the loop
+                    </span>
                   </div>
                 </div>
               </div>
@@ -483,21 +414,105 @@ function HomePage({ isLanding = true }: Props) {
                         </div>
                       </div>
 
-                      <div className='relative'>
+                      {isLanding === false ? (
                         <div className='relative'>
-                          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
-                          <input
-                            type='text'
-                            value={formData.projectName}
-                            onChange={(e) =>
-                              handleInputChange('projectName', e.target.value)
-                            }
-                            placeholder='Project Name (e.g., Godrej Splendour)'
-                            className='w-full pl-10 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
-                            disabled={loading}
-                          />
+                          <div className='relative'>
+                            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                            <input
+                              type='text'
+                              value={formData.projectName}
+                              onChange={(e) =>
+                                handleInputChange('projectName', e.target.value)
+                              }
+                              placeholder='Project Name (e.g., Godrej Splendour)'
+                              className='w-full pl-10 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                              disabled={loading}
+                            />
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className='flex flex-col md:flex-row gap-4'>
+                          <div className='flex-1 relative'>
+                            <div className='relative'>
+                              <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10' />
+                              <Autocomplete
+                                getItemValue={(item: any) => item.label}
+                                items={filterAutocompleteItems(
+                                  autocompleteData,
+                                  value
+                                )}
+                                renderItem={(
+                                  item: any,
+                                  isHighlighted: boolean
+                                ) => (
+                                  <div
+                                    key={`${item.type}-${item.id}`}
+                                    className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                                      isHighlighted ? 'bg-blue-50' : 'bg-white'
+                                    } hover:bg-blue-50`}
+                                  >
+                                    <div className='flex items-center justify-between'>
+                                      <div>
+                                        <div className='font-semibold text-gray-900 text-left'>
+                                          {item.label}
+                                        </div>
+                                        <div className='text-sm text-gray-600 text-left'>
+                                          {item.subtitle}
+                                        </div>
+                                      </div>
+                                      <div
+                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                          item.type === 'builder'
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : item.type === 'project'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-gray-100 text-gray-800' // Custom option styling
+                                        }`}
+                                      >
+                                        {item.type === 'builder'
+                                          ? 'Builder'
+                                          : item.type === 'project'
+                                          ? 'Project'
+                                          : 'Custom'}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                renderMenu={(items, value, style) => {
+                                  if (!value && items.length === 0) return null;
+
+                                  return (
+                                    <div
+                                      className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
+                                      style={{ top: '100%' }}
+                                    >
+                                      {items}
+                                    </div>
+                                  );
+                                }}
+                                wrapperStyle={{
+                                  position: 'relative',
+                                  display: 'block',
+                                  width: '100%',
+                                }}
+                                wrapperProps={{
+                                  className: 'relative w-full',
+                                }}
+                                inputProps={{
+                                  placeholder:
+                                    'Search for builders or projects',
+                                  className:
+                                    'w-full pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                                }}
+                                value={value}
+                                onChange={(e) => setValue(e.target.value)}
+                                onSelect={handleAutocompleteSelect}
+                                menuStyle={{}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       <button
                         type='submit'
@@ -610,60 +625,14 @@ function HomePage({ isLanding = true }: Props) {
           </div>
         </section>
 
-        {/* Top Builders Section */}
-        <section id='builders' className='py-16 bg-gray-50'>
-          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <div className='text-center mb-12'>
-              <h2 className='text-3xl font-bold text-gray-900 mb-4'>
-                Top Builders in India
-              </h2>
-              <p className='text-xl text-gray-600'>
-                Connect directly with India's most trusted real estate
-                developers
-              </p>
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
-              {builderData?.length > 0 &&
-                builderData.slice(0, 8)?.map((builder: any, index: number) => (
-                  <Link
-                    key={builder.id}
-                    href={`/builder/${builder.id}`}
-                    className='h-full relative'
-                  >
-                    <div className='h-full bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer'>
-                      <div className='relative flex justify-center items-center'>
-                        <Image
-                          src={builder.logo_image}
-                          alt={builder.name}
-                          className='w-48 h-48 object-contain rounded-t-xl'
-                          width={100}
-                          height={100}
-                          unoptimized
-                        />
-                      </div>
-
-                      <div className='space-y-2 p-6 flex flex-col'>
-                        <span className='font-semibold'>{builder.name}</span>
-                        <span className='font-normal text-sm'>
-                          {builder.tagline}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-            </div>
-          </div>
-        </section>
-
         {/* Featured Projects Section */}
-        <section id='projects' className='py-16 bg-white'>
+        <section id='projects' className='py-6 md:py-12 bg-white'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='text-center mb-12'>
               <h2 className='text-3xl font-bold text-gray-900 mb-4'>
                 Top Projects
               </h2>
-              <p className='text-xl text-gray-600'>
+              <p className='text-xl text-gray-600 mb-4'>
                 Premium residential projects with instant builder connection
               </p>
             </div>
@@ -731,11 +700,73 @@ function HomePage({ isLanding = true }: Props) {
             ) : (
               <Loader />
             )}
+            <div className='flex justify-center items-center w-full mt-6'>
+              <Link
+                href='/projects'
+                className='inline-block px-6 py-2  bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-full transition-colors'
+              >
+                VIEW ALL
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Top Builders Section */}
+        <section id='builders' className='py-6 md:py-12 bg-gray-50'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='text-center mb-12'>
+              <h2 className='text-3xl font-bold text-gray-900 mb-4'>
+                Top Builders in India
+              </h2>
+              <p className='text-xl text-gray-600 mb-4'>
+                Connect directly with India's most trusted real estate
+                developers
+              </p>
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+              {builderData?.length > 0 &&
+                builderData.slice(0, 8)?.map((builder: any, index: number) => (
+                  <Link
+                    key={builder.id}
+                    href={`/builder/${builder.id}`}
+                    className='h-full relative'
+                  >
+                    <div className='h-full bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer'>
+                      <div className='relative flex justify-center items-center'>
+                        <Image
+                          src={builder.logo_image}
+                          alt={builder.name}
+                          className='w-48 h-48 object-contain rounded-t-xl'
+                          width={100}
+                          height={100}
+                          unoptimized
+                        />
+                      </div>
+
+                      <div className='space-y-2 p-6 flex flex-col'>
+                        <span className='font-semibold'>{builder.name}</span>
+                        <span className='font-normal text-sm'>
+                          {builder.tagline}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+            </div>
+            <div className='flex justify-center items-center w-full mt-6'>
+              <Link
+                href='/builders'
+                className='inline-block px-6 py-2  bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-full transition-colors'
+              >
+                VIEW ALL
+              </Link>
+            </div>
           </div>
         </section>
 
         {/* Why Choose Us Section */}
-        <section className='py-16 bg-blue-50'>
+        <section className='py-6 md:py-12 bg-blue-50'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='text-center mb-12'>
               <h2 className='text-3xl font-bold text-gray-900 mb-4'>

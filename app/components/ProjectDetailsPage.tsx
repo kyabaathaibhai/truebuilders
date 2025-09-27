@@ -1,16 +1,7 @@
 'use client';
 import { ProjectService } from '@lib/ProjectService';
 import Logo from 'assets/Logo';
-import {
-  Car,
-  Dumbbell,
-  Home,
-  MapPin,
-  ShoppingBag,
-  TreePine,
-  Users,
-  Waves,
-} from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -18,28 +9,6 @@ import OTPVerificationModal from './OtpVerificationModal';
 import Loader from './Loader';
 import { event } from '@lib/gtag';
 
-const getAmenityIcon = (amenity: string) => {
-  switch (amenity.toLowerCase()) {
-    case 'swimming pool':
-      return <Waves className='h-4 w-4' />;
-    case 'gym':
-      return <Dumbbell className='h-4 w-4' />;
-    case 'parking':
-      return <Car className='h-4 w-4' />;
-    case 'kids play area':
-      return <Users className='h-4 w-4' />;
-    case 'landscaped gardens':
-    case 'garden':
-      return <TreePine className='h-4 w-4' />;
-    case 'shopping mall':
-    case 'market':
-      return <ShoppingBag className='h-4 w-4' />;
-    default:
-      return <Home className='h-4 w-4' />;
-  }
-};
-
-// Export viewport separately
 export default function ProjectDetailsPage({ projectId }) {
   const [projectData, setProjectData] = useState<any>(null);
   const [showVerificationModal, setShowVerificationModal] =
@@ -47,7 +16,7 @@ export default function ProjectDetailsPage({ projectId }) {
   const handleVerificationModal = () => {
     setShowVerificationModal((prev) => !prev);
     event({
-      action: 'get_callback_cta_clicked',
+      action: 'get_callback_project_cta_clicked',
       project_id: projectId,
     });
   };
