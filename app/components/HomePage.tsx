@@ -32,7 +32,6 @@ function HomePage({ isLanding = true }: Props) {
   const [builderData, setBuilderData] = useState<any>([]);
   const [projectData, setProjectData] = useState<any>([]);
   const [autocompleteData, setAutocompleteData] = useState<any>([]);
-  const [value, setValue] = useState<any>('');
   const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   // Form states
@@ -45,6 +44,8 @@ function HomePage({ isLanding = true }: Props) {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resendTimer, setResendTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
 
   async function fetchBuilderList() {
     try {
@@ -108,17 +109,7 @@ function HomePage({ isLanding = true }: Props) {
 
   const handleAutocompleteSelect = (selectedValue: any, item: any) => {
     if (!item) return;
-
     handleInputChange('projectName', selectedValue);
-    if (item.type === 'custom') {
-      console.log('User entered custom value:', selectedValue);
-      setValue(selectedValue);
-      return;
-    }
-
-    if (item.id) {
-      setValue(selectedValue);
-    }
   };
 
   const filterAutocompleteItems = (items: any[], value: string) => {
@@ -166,6 +157,8 @@ function HomePage({ isLanding = true }: Props) {
         user_input: formData.projectName,
       });
       setFormStep('otp');
+      setResendTimer(60);
+      setCanResend(false);
     } catch (error: any) {
       setError(
         error.message ||
@@ -175,6 +168,25 @@ function HomePage({ isLanding = true }: Props) {
       setLoading(false);
     }
   };
+
+  // Handle resend timer countdown
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (formStep === 'otp' && resendTimer > 0) {
+      timerId = setTimeout(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    if (resendTimer === 0) {
+      setCanResend(true);
+    }
+
+    return () => {
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [formStep, resendTimer]);
 
   const verifyOTP = async () => {
     setLoading(true);
@@ -199,11 +211,6 @@ function HomePage({ isLanding = true }: Props) {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    event({
-      action: 'get_callback_cta_clicked',
-      project_id: -1,
-    });
-
     // Basic validation
     if (!formData.name.trim()) {
       setError('Please enter your name');
@@ -215,12 +222,22 @@ function HomePage({ isLanding = true }: Props) {
       return;
     }
 
+    if (!formData['projectName'].trim()) {
+      setError('Please Select any Project');
+      return;
+    }
+
     // Basic phone number validation (Indian format)
     const phoneRegex = /^[+]?[0-9]{10,13}$/;
     if (!phoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
       setError('Please enter a valid phone number');
       return;
     }
+
+    event({
+      action: 'get_callback_cta_clicked',
+      project_id: -1,
+    });
 
     requestOTP();
   };
@@ -247,6 +264,8 @@ function HomePage({ isLanding = true }: Props) {
     setOtp('');
     setError('');
     setLoading(false);
+    setResendTimer(60);
+    setCanResend(false);
   };
 
   const handleVerificationModal = () => {
@@ -440,7 +459,7 @@ function HomePage({ isLanding = true }: Props) {
                                 getItemValue={(item: any) => item.label}
                                 items={filterAutocompleteItems(
                                   autocompleteData,
-                                  value
+                                  formData.projectName
                                 )}
                                 renderItem={(
                                   item: any,
@@ -505,8 +524,15 @@ function HomePage({ isLanding = true }: Props) {
                                   className:
                                     'w-full pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                                 }}
-                                value={value}
-                                onChange={(e) => setValue(e.target.value)}
+                                value={formData.projectName}
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLInputElement>
+                                ) =>
+                                  setFormData({
+                                    ...formData,
+                                    projectName: e.target.value,
+                                  })
+                                }
                                 onSelect={handleAutocompleteSelect}
                                 menuStyle={{}}
                               />
@@ -539,11 +565,8 @@ function HomePage({ isLanding = true }: Props) {
                         Verify Your Phone
                       </h3>
                       <p className='text-sm sm:text-base text-gray-600'>
-                        {/* We've sent a 6-digit OTP to <br />
-                        <span className='font-semibold'>
-                          {formData.phoneNumber}
-                        </span> */}
-                        OTP has been sent on your Whatsapp number
+                        OTP has been sent on your{' '}
+                        <span className='font-bold'>Whatsapp </span>number
                       </p>
                     </div>
 
@@ -577,15 +600,52 @@ function HomePage({ isLanding = true }: Props) {
                         {loading ? 'Verifying...' : 'Verify OTP'}
                       </button>
 
-                      <div className='text-center'>
+                      <div className='text-center space-y-2 flex justify-between items-center'>
                         <button
                           type='button'
-                          onClick={() => setFormStep('form')}
+                          onClick={() => {
+                            setFormStep('form');
+                            setResendTimer(60);
+                            setCanResend(false);
+                          }}
                           className='text-blue-600 hover:text-blue-700 text-sm font-medium'
                           disabled={loading}
                         >
                           ← Back to form
                         </button>
+                        <div className='flex items-center justify-center gap-2'>
+                          {!canResend ? (
+                            <p className='text-gray-600 text-sm'>
+                              Resend OTP in{' '}
+                              <span className='font-semibold'>
+                                {resendTimer}s
+                              </span>
+                            </p>
+                          ) : (
+                            <button
+                              type='button'
+                              onClick={requestOTP}
+                              className='text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center'
+                              disabled={loading}
+                            >
+                              <svg
+                                xmlns='http://www.w3.org/2000/svg'
+                                className='h-4 w-4 mr-1'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                                stroke='currentColor'
+                              >
+                                <path
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                  strokeWidth={2}
+                                  d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                                />
+                              </svg>
+                              Resend OTP
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </form>
                   </>
@@ -917,6 +977,7 @@ function HomePage({ isLanding = true }: Props) {
         <OTPVerificationModal
           isOpen={showVerificationModal}
           onClose={handleVerificationModal}
+          showMessageInput={true}
         />
       )}
     </>

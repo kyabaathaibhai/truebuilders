@@ -12,6 +12,7 @@ interface OTPVerificationModalProps {
   subtitle?: string;
   projectId?: number;
   callBackTime?: number;
+  showMessageInput?: boolean;
 }
 
 const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
@@ -22,6 +23,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   projectId = 0,
   callBackTime = 30,
   subtitle = 'TrueBuilders',
+  showMessageInput = false,
 }) => {
   const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
   const [formData, setFormData] = useState({
@@ -48,11 +50,13 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
     setError('');
 
     try {
-      const response = await OtpService.requestOtp({
+      let payload = {
         name: formData.name,
         phone_number: formData.phoneNumber,
         project_id: projectId,
-      });
+      };
+      if (showMessageInput) payload['user_input'] = formData['user_input'];
+      const response = await OtpService.requestOtp(payload);
       setStep('otp');
     } catch (error) {
       setError(
@@ -100,6 +104,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       setError('Please enter your phone number');
       return;
     }
+    if (showMessageInput && !formData['user_input'].trim()) {
+      setError('Please enter your message');
+      return;
+    }
 
     // Basic phone number validation (Indian format)
     const phoneRegex = /^[+]?[0-9]{10,13}$/;
@@ -142,7 +150,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4'>
       <div className='bg-white rounded-2xl p-8 max-w-2xl w-full relative'>
         {/* Close Button */}
         <button
@@ -205,6 +213,27 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                   />
                 </div>
               </div>
+
+              {showMessageInput && (
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Message
+                  </label>
+                  <div className='relative'>
+                    <User className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                    <input
+                      type='text'
+                      value={formData['user_input']}
+                      onChange={(e) =>
+                        handleInputChange('user_input', e.target.value)
+                      }
+                      placeholder='Enter your full name'
+                      className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+              )}
 
               <button
                 type='submit'
