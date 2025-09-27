@@ -21,7 +21,7 @@ const getDeviceInfo = () => {
 
 type GAEventProps = {
   action: string;
-  project_id: string;
+  project_id: string | number;
 };
 
 export const event = ({ action, project_id }: GAEventProps) => {

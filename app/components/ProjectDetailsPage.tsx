@@ -2,15 +2,11 @@
 import { ProjectService } from '@lib/ProjectService';
 import Logo from 'assets/Logo';
 import {
-  ArrowLeft,
   Car,
   Dumbbell,
-  Eye,
-  Heart,
   Home,
   MapPin,
   ShoppingBag,
-  Star,
   TreePine,
   Users,
   Waves,

@@ -10,6 +10,8 @@ import {
   CheckCircle,
   Award,
   Shield,
+  User,
+  MessageSquare,
 } from 'lucide-react';
 import Logo from 'assets/Logo';
 import Link from 'next/link';
@@ -18,16 +20,33 @@ import Image from 'next/image';
 import { ProjectService } from '@lib/ProjectService';
 import Autocomplete from 'react-autocomplete';
 import { useRouter } from 'next/navigation';
-import OTPVerificationModal from './OtpVerificationModal';
+import { OtpService } from '@lib/OtpService';
 import Loader from './Loader';
+import OTPVerificationModal from './OtpVerificationModal';
+import { event } from '@lib/gtag';
 
-function HomePage() {
+interface Props {
+  isLanding?: boolean;
+}
+
+function HomePage({ isLanding = true }: Props) {
   const router = useRouter();
   const [builderData, setBuilderData] = useState<any>([]);
   const [projectData, setProjectData] = useState<any>([]);
-  const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [autocompleteData, setAutocompleteData] = useState<any>([]);
   const [value, setValue] = useState<any>('');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+  // Form states
+  const [formStep, setFormStep] = useState<'form' | 'otp' | 'success'>('form');
+  const [formData, setFormData] = useState({
+    name: '',
+    phoneNumber: '',
+    projectName: '',
+  });
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function fetchBuilderList() {
     try {
@@ -109,6 +128,116 @@ function HomePage() {
     );
   };
 
+  // Form handler functions
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (error) setError(''); // Clear error when user starts typing
+  };
+
+  const handleOTPChange = (value: string) => {
+    // Only allow numbers and limit to 6 digits
+    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    setOtp(numericValue);
+    if (error) setError(''); // Clear error when user starts typing
+  };
+
+  // API call to request OTP
+  const requestOTP = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await OtpService.requestOtp({
+        name: formData.name,
+        phone_number: formData.phoneNumber,
+        project_id: -1,
+        user_input: formData.projectName,
+      });
+      setFormStep('otp');
+    } catch (error: any) {
+      setError(
+        error.message ||
+          'Network error. Please check your connection and try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // API call to verify OTP
+  const verifyOTP = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await OtpService.verifyOtp({
+        phone_number: formData.phoneNumber,
+        otp: otp,
+        project_id: -1,
+        user_input: formData.projectName,
+      });
+
+      setFormStep('success');
+    } catch (error: any) {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    event({
+      action: 'get_callback_cta_clicked',
+      project_id: -1,
+    });
+
+    // Basic validation
+    if (!formData.name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      setError('Please enter your phone number');
+      return;
+    }
+
+    // Basic phone number validation (Indian format)
+    const phoneRegex = /^[+]?[0-9]{10,13}$/;
+    if (!phoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+
+    requestOTP();
+  };
+
+  const handleOTPSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!otp.trim()) {
+      setError('Please enter the OTP');
+      return;
+    }
+
+    if (otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    verifyOTP();
+  };
+
+  const resetForm = () => {
+    setFormStep('form');
+    setFormData({ name: '', phoneNumber: '', projectName: '' });
+    setOtp('');
+    setError('');
+    setLoading(false);
+  };
+
   const handleVerificationModal = () => {
     setShowVerificationModal((prev) => !prev);
   };
@@ -126,12 +255,12 @@ function HomePage() {
         <header className='bg-white shadow-sm border-b border-gray-100'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='flex justify-between items-center h-16'>
-              <div className='flex items-center'>
+              <Link href='/' className='flex items-center'>
                 <Logo />
                 <span className='text-2xl font-bold text-gray-900'>
                   TrueBuilders
                 </span>
-              </div>
+              </Link>
               <nav className='hidden md:flex space-x-8'>
                 <a
                   href='#builders'
@@ -163,186 +292,322 @@ function HomePage() {
         </header>
 
         {/* Hero Section */}
-        <section className='bg-[#f5f5f7] relative pt-16 pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
+        <section className='bg-[#f5f5f7] relative pt-8 md:pt-16 pb-12 md:pb-24 min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden relative'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-[100]'>
-            <div className='text-center'>
-              <h1 className='text-4xl sm:text-6xl font-black text-center text-balance text-carbon-800'>
-                <span className='inline'>Connect Directly with</span>
-                <span className='bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text inline h-auto'>
-                  {' '}
-                  Builders
-                </span>
-                <br />
-                <span className='inline text-2xl sm:text-5xl'> in 30mins</span>
-              </h1>
-              <p className='text-md sm:text-lg text-carbon-750 text-center max-w-3xl mx-auto my-4 font-normal'>
-                Skip broker commission. Get instant callbacks directly from real
-                estate developers.
-              </p>
+            <div className='flex flex-col lg:flex-row gap-8 lg:gap-5 items-center'>
+              <div className='text-center lg:text-left flex-1 lg:flex-[3] w-full'>
+                {isLanding ? (
+                  <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black text-center lg:text-left text-balance text-carbon-800'>
+                    <span className='inline leading-[1.3]'>Still paying</span>
+                    <span className='bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text inline h-auto'>
+                      {' '}
+                      5% premium
+                      <span className='inline text-black'> to brokers?</span>
+                    </span>
+                  </h1>
+                ) : (
+                  <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black text-center lg:text-left text-balance text-carbon-800'>
+                    <span className='inline leading-[1.3]'>
+                      Not able to connect
+                    </span>
+                    <span className=' inline h-auto text-black'>
+                      {' '}
+                      directly with
+                      <span className='inline  bg-gradient-to-r from-[#9964FF] to-[#4323FC] text-transparent bg-clip-text'>
+                        {' '}
+                        builder?
+                      </span>
+                    </span>
+                  </h1>
+                )}
+                <h2 className='text-2xl sm:text-3xl font-bold text-carbon-800 text-center lg:text-left my-4'>
+                  {isLanding === true
+                    ? 'Save upto 40lacs in brokerage'
+                    : 'Get callback from official builders team'}
+                </h2>
+                <p className='text-md sm:text-lg text-carbon-750 text-center lg:text-left my-4 font-normal'>
+                  Skip broker commission. Get instant callbacks directly from
+                  real estate developers.
+                </p>
 
-              {/* Search Bar */}
-              <div className='max-w-4xl mx-auto mb-12'>
-                <div className='bg-white rounded-2xl shadow-xl p-6 border border-gray-100'>
-                  <div className='flex flex-col md:flex-row gap-4'>
-                    <div className='flex-1 relative'>
-                      <div className='relative'>
-                        <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10' />
-                        <Autocomplete
-                          getItemValue={(item) => item.label}
-                          items={filterAutocompleteItems(
-                            autocompleteData,
-                            value
-                          )}
-                          renderItem={(item, isHighlighted) => (
-                            <div
-                              key={`${item.type}-${item.id}`}
-                              className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
-                                isHighlighted ? 'bg-blue-50' : 'bg-white'
-                              } hover:bg-blue-50`}
-                            >
-                              <div className='flex items-center justify-between'>
-                                <div>
-                                  <div className='font-semibold text-gray-900 text-left'>
-                                    {item.label}
-                                  </div>
-                                  <div className='text-sm text-gray-600 text-left'>
-                                    {item.subtitle}
-                                  </div>
-                                </div>
+                {/* Search Bar */}
+                {isLanding === true && (
+                  <div className='max-w-4xl mx-auto mb-8 md:mb-12 mt-6'>
+                    <div className='bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100'>
+                      <div className='flex flex-col md:flex-row gap-4'>
+                        <div className='flex-1 relative'>
+                          <div className='relative'>
+                            <Search className='absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10' />
+                            <Autocomplete
+                              getItemValue={(item) => item.label}
+                              items={filterAutocompleteItems(
+                                autocompleteData,
+                                value
+                              )}
+                              renderItem={(item, isHighlighted) => (
                                 <div
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    item.type === 'builder'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-green-100 text-green-800'
-                                  }`}
+                                  key={`${item.type}-${item.id}`}
+                                  className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                                    isHighlighted ? 'bg-blue-50' : 'bg-white'
+                                  } hover:bg-blue-50`}
                                 >
-                                  {item.type === 'builder'
-                                    ? 'Builder'
-                                    : 'Project'}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          renderMenu={(items, value, style) => {
-                            return items.length > 0 || value ? (
-                              <div
-                                className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
-                                style={{ top: '100%' }}
-                              >
-                                {items.length === 0 && value ? (
-                                  <div className='p-4 text-gray-500 text-center'>
-                                    No results found for "{value}"
+                                  <div className='flex items-center justify-between'>
+                                    <div>
+                                      <div className='font-semibold text-gray-900 text-left'>
+                                        {item.label}
+                                      </div>
+                                      <div className='text-sm text-gray-600 text-left'>
+                                        {item.subtitle}
+                                      </div>
+                                    </div>
+                                    <div
+                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        item.type === 'builder'
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-green-100 text-green-800'
+                                      }`}
+                                    >
+                                      {item.type === 'builder'
+                                        ? 'Builder'
+                                        : 'Project'}
+                                    </div>
                                   </div>
-                                ) : (
-                                  items
-                                )}
-                              </div>
-                            ) : null;
-                          }}
-                          wrapperStyle={{
-                            position: 'relative',
-                            display: 'block',
-                            width: '100%',
-                          }}
-                          wrapperProps={{
-                            className: 'relative w-full',
-                          }}
-                          inputProps={{
-                            placeholder:
-                              'Search for builders or projects (e.g., Prestige, Godrej Properties)',
-                            className:
-                              'w-full pl-12 pr-4 py-4 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                          }}
-                          value={value}
-                          onChange={(e) => setValue(e.target.value)}
-                          onSelect={handleAutocompleteSelect}
-                          menuStyle={{}}
-                        />
+                                </div>
+                              )}
+                              renderMenu={(items, value, style) => {
+                                return items.length > 0 || value ? (
+                                  <div
+                                    className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
+                                    style={{ top: '100%' }}
+                                  >
+                                    {items.length === 0 && value ? (
+                                      <div className='p-4 text-gray-500 text-center'>
+                                        No results found for "{value}"
+                                      </div>
+                                    ) : (
+                                      items
+                                    )}
+                                  </div>
+                                ) : null;
+                              }}
+                              wrapperStyle={{
+                                position: 'relative',
+                                display: 'block',
+                                width: '100%',
+                              }}
+                              wrapperProps={{
+                                className: 'relative w-full',
+                              }}
+                              inputProps={{
+                                placeholder:
+                                  'Search for builders or projects',
+                                className:
+                                  'w-full pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                              }}
+                              value={value}
+                              onChange={(e) => setValue(e.target.value)}
+                              onSelect={handleAutocompleteSelect}
+                              menuStyle={{}}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Trust Indicators as Chips */}
+                <div className='flex flex-wrap justify-start gap-3'>
+                  <div className='flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full'>
+                    <Shield className='h-5 w-5' />
+                    <span className='font-medium'>Zero data sharing</span>
+                  </div>
+                  <div className='flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full'>
+                    <Award className='h-5 w-5' />
+                    <span className='font-medium'>GDPR compliant</span>
+                  </div>
+                  <div className='flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full'>
+                    <Users className='h-5 w-5' />
+                    <span className='font-medium'>No brokers in the loop</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Trust Indicators */}
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto'>
-                <div className='flex items-center justify-center space-x-3 text-black'>
-                  <Clock className='h-8 w-8 text-green-400' />
-                  <div className='text-left'>
-                    <div className='font-bold '>30 Minutes</div>
-                    <div className=''>Callback Guarantee</div>
+              {/* Right Side - Contact Form with Steps */}
+              <div className='bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md mx-auto lg:max-w-none w-full lg:flex-[2] mt-8 lg:mt-0'>
+                {/* Form Step */}
+                {formStep === 'form' && (
+                  <>
+                    <h2 className='text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center'>
+                      Get callback from builder in 30mins
+                    </h2>
+
+                    <form onSubmit={handleFormSubmit} className='space-y-6'>
+                      {error && (
+                        <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm'>
+                          {error}
+                        </div>
+                      )}
+
+                      <div>
+                        <div className='relative'>
+                          <User className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                          <input
+                            type='text'
+                            value={formData.name}
+                            onChange={(e) =>
+                              handleInputChange('name', e.target.value)
+                            }
+                            placeholder='Your Full Name'
+                            className='w-full pl-10 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                            disabled={loading}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className='relative'>
+                          <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                          <input
+                            type='tel'
+                            value={formData.phoneNumber}
+                            onChange={(e) =>
+                              handleInputChange('phoneNumber', e.target.value)
+                            }
+                            placeholder='Your Phone Number'
+                            className='w-full pl-10 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                            disabled={loading}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className='relative'>
+                        <div className='relative'>
+                          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                          <input
+                            type='text'
+                            value={formData.projectName}
+                            onChange={(e) =>
+                              handleInputChange('projectName', e.target.value)
+                            }
+                            placeholder='Project Name (e.g., Godrej Splendour)'
+                            className='w-full pl-10 pr-4 py-3 sm:py-4 text-base sm:text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type='submit'
+                        disabled={loading}
+                        className='w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3 sm:py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg'
+                      >
+                        {loading
+                          ? 'Sending OTP...'
+                          : 'Get Callback from Builder'}
+                      </button>
+                    </form>
+                  </>
+                )}
+
+                {/* OTP Step */}
+                {formStep === 'otp' && (
+                  <>
+                    <div className='text-center mb-4 sm:mb-6'>
+                      <div className='w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4'>
+                        <MessageSquare className='h-6 w-6 sm:h-8 sm:w-8 text-blue-600' />
+                      </div>
+                      <h3 className='text-xl sm:text-2xl font-bold text-gray-900 mb-2'>
+                        Verify Your Phone
+                      </h3>
+                      <p className='text-sm sm:text-base text-gray-600'>
+                        We've sent a 6-digit OTP to <br />
+                        <span className='font-semibold'>
+                          {formData.phoneNumber}
+                        </span>
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleOTPSubmit} className='space-y-4'>
+                      {error && (
+                        <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm'>
+                          {error}
+                        </div>
+                      )}
+
+                      <div>
+                        <label className='block text-sm font-medium text-gray-700 mb-2'>
+                          Enter OTP
+                        </label>
+                        <input
+                          type='text'
+                          value={otp}
+                          onChange={(e) => handleOTPChange(e.target.value)}
+                          placeholder='123456'
+                          className='w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-xl sm:text-2xl font-mono tracking-widest'
+                          maxLength={6}
+                          disabled={loading}
+                        />
+                      </div>
+
+                      <button
+                        type='submit'
+                        disabled={loading || otp.length !== 6}
+                        className='w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        {loading ? 'Verifying...' : 'Verify OTP'}
+                      </button>
+
+                      <div className='text-center'>
+                        <button
+                          type='button'
+                          onClick={() => setFormStep('form')}
+                          className='text-blue-600 hover:text-blue-700 text-sm font-medium'
+                          disabled={loading}
+                        >
+                          ← Back to form
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
+
+                {/* Success Step */}
+                {formStep === 'success' && (
+                  <div className='text-center'>
+                    <div className='w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+                      <CheckCircle className='h-12 w-12 text-green-600' />
+                    </div>
+
+                    <h3 className='text-2xl font-bold text-gray-900 mb-4'>
+                      Thank You!
+                    </h3>
+
+                    <p className='text-gray-600 mb-6'>
+                      TrueBuilders team will get back to you in 30 minutes.
+                    </p>
+                    <p className='text-gray-600 mb-3 font-bold'>
+                      Working hours (10am - 6pm)
+                    </p>
+                    <div className='bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-6'>
+                      We will contact you at{' '}
+                      <span className='font-semibold'>
+                        {formData.phoneNumber}
+                      </span>
+                    </div>
+                    <button
+                      onClick={resetForm}
+                      className='w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors'
+                    >
+                      Submit Another Request
+                    </button>
                   </div>
-                </div>
-                <div className='flex items-center justify-center space-x-3'>
-                  <Shield className='h-8 w-8 text-blue-200' />
-                  <div className='text-left'>
-                    <div className='font-bold '>100% Direct</div>
-                    <div className=''>No Middlemen</div>
-                  </div>
-                </div>
-                <div className='flex items-center justify-center space-x-3'>
-                  <Award className='h-8 w-8 text-yellow-400' />
-                  <div className='text-left'>
-                    <div className='font-bold '>Best Rates</div>
-                    <div className=''>Guaranteed</div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
-          {/* <div className='absolute inset-0 top-0 md:-top-[200px] blur-[48px] z-0 '>
-            <svg
-              viewBox='0 0 1440 914'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <g className=''>
-                <path
-                  d='M1553 338.047C1553 338.047 1291.94 304.49 1128.5 338.047C959.847 372.675 718.093 344.881 562.5 258.9C492.929 220.455 303.804 171.521 126.208 137.815C-37.5648 106.732 -145 137.815 -145 137.815V746.5C-145 746.5 291.445 696.279 623 696.279C954.555 696.279 1553 789.974 1553 789.974V338.047Z'
-                  fill='url(#paint0_linear_45_104)'
-                  fill-opacity='0.2'
-                ></path>
-              </g>
-              <g className=''>
-                <path
-                  d='M-114 240.047C-114 240.047 147.061 206.49 310.5 240.047C479.153 274.675 720.907 346.881 876.5 260.9C946.071 222.455 1135.2 173.521 1312.79 139.815C1476.56 108.732 1584 139.815 1584 139.815V566.5C1584 566.5 1147.56 698.279 816 698.279C484.445 698.279 -91.5 590.5 -91.5 590.5L-114 240.047Z'
-                  fill='url(#paint1_linear_45_104)'
-                  fill-opacity='0.2'
-                ></path>
-              </g>
-              <g className=''>
-                <path
-                  d='M484 285C484 384.291 403.411 464.782 304 464.782C204.589 464.782 124 384.291 124 285C124 185.71 243.724 124 343.135 124C442.546 124 484 185.71 484 285Z'
-                  fill='#FACC15'
-                  fill-opacity='0.12'
-                ></path>
-              </g>
-              <defs>
-                <linearGradient
-                  id='paint0_linear_45_104'
-                  x1='1553'
-                  y1='521.652'
-                  x2='-145'
-                  y2='521.652'
-                  gradientUnits='userSpaceOnUse'
-                >
-                  <stop offset='0.595' stop-color='#3F20FB'></stop>
-                  <stop offset='1' stop-color='#B377FF'></stop>
-                </linearGradient>
-                <linearGradient
-                  id='paint1_linear_45_104'
-                  x1='-114'
-                  y1='523.652'
-                  x2='1584'
-                  y2='523.652'
-                  gradientUnits='userSpaceOnUse'
-                >
-                  <stop stop-color='#3F20FB'></stop>
-                  <stop offset='0.385' stop-color='#B377FF'></stop>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div> */}
         </section>
 
         {/* Top Builders Section */}
