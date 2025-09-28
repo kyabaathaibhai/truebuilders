@@ -205,6 +205,10 @@ function HomePage({ isLanding = true }: Props) {
         project_id: formData['project_id'],
         user_input: formData.projectName,
       });
+      event({
+        action: 'otp_verified',
+        project_id: formData['project_id'],
+      });
 
       setFormStep('success');
     } catch (error: any) {

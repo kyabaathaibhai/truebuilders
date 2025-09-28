@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Phone, User, MessageSquare, CheckCircle, X } from 'lucide-react';
 import { OtpService } from '@lib/OtpService';
+import { event } from '@lib/gtag';
 
 interface OTPVerificationModalProps {
   isOpen?: boolean;
@@ -77,6 +78,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       const response = await OtpService.verifyOtp({
         phone_number: formData.phoneNumber,
         otp: otp,
+        project_id: projectId,
+      });
+      event({
+        action: 'otp_verified',
         project_id: projectId,
       });
 
