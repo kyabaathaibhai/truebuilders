@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: 'TrueBuilders',
     images: [
       {
-        url: '/ogImage.png', // keep this in /public
+        url: 'https://truebuilders.co.in/ogImage.png', // keep this in /public
         width: 1200,
         height: 630,
         alt: 'TrueBuilders - Skip broker commission',
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TrueBuilders',
     description: 'Skip broker commission. Connect directly with builders.',
-    images: ['/ogImage.png'],
+    images: ['https://truebuilders.co.in/ogImage.png'],
   },
   icons: {
     icon: '/favicon.svg',
