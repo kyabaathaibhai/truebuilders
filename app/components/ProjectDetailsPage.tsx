@@ -1,25 +1,22 @@
 'use client';
 import { ProjectService } from '@lib/ProjectService';
 import Logo from 'assets/Logo';
-import { MapPin } from 'lucide-react';
+import { MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import OTPVerificationModal from './OtpVerificationModal';
 import Loader from './Loader';
 import { event } from '@lib/gtag';
+import { OtpService } from '@lib/OtpService';
 
 export default function ProjectDetailsPage({ projectId }) {
   const [projectData, setProjectData] = useState<any>(null);
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [error, setError] = useState<string>('');
+
   const [showVerificationModal, setShowVerificationModal] =
     useState<boolean>(false);
-  const handleVerificationModal = () => {
-    setShowVerificationModal((prev) => !prev);
-    event({
-      action: 'get_callback_project_cta_clicked',
-      project_id: projectId,
-    });
-  };
   async function fetchBuilderDetails() {
     try {
       const list = await ProjectService.getProjectDetails(projectId);
@@ -28,6 +25,38 @@ export default function ProjectDetailsPage({ projectId }) {
       setProjectData(null);
     }
   }
+
+  const requestOTP = async () => {
+    try {
+      if (!phoneNumber.trim()) {
+        setError('Please enter your phone number');
+        return;
+      }
+      const phoneRegex = /^[+]?[0-9]{10,13}$/;
+      if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+        setError('Please enter a valid phone number');
+        return;
+      }
+      let payload = {
+        name: '',
+        phone_number: phoneNumber,
+        project_id: projectId,
+      };
+      const response = await OtpService.requestOtp(payload);
+      setError('');
+      setShowVerificationModal((prev) => !prev);
+    } catch (error) {
+      setError(
+        error.message ||
+          'Network error. Please check your connection and try again.'
+      );
+    } finally {
+      event({
+        action: 'get_callback_project_cta_clicked',
+        project_id: projectId,
+      });
+    }
+  };
 
   useEffect(() => {
     if (projectId) fetchBuilderDetails();
@@ -141,12 +170,31 @@ export default function ProjectDetailsPage({ projectId }) {
 
             {/* Sidebar */}
             <div className='lg:col-span-1 flex flex-col gap-4 items-left'>
-              <button
-                className='text-lg font-medium google-signin-button text-white items-center justify-center rounded-full py-2 relative z-10 transition-all duration-300 h:12 md:h-16 md:w-fit mx-auto px-10 md:px-20'
-                onClick={() => handleVerificationModal()}
-              >
-                Get Callback from Builder
-              </button>
+              <div className='bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-4'>
+                <div className='relative'>
+                  <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                  <input
+                    type='tel'
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder='+91 98765 43210'
+                    className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  />
+                </div>
+                {error && (
+                  <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm'>
+                    {error}
+                  </div>
+                )}
+                <button
+                  className='w-full text-lg font-medium google-signin-button text-white items-center justify-center rounded-full py-2 relative z-10 transition-all duration-300 h:12 md:h-16 px-10'
+                  onClick={() => {
+                    requestOTP();
+                  }}
+                >
+                  Get Callback from Builder
+                </button>
+              </div>
               <div className='bg-white border border-gray-200 rounded-xl p-6'>
                 <div className='text-3xl font-bold text-gray-900 mb-6'>
                   {projectData?.project_snapshot?.price_starting_from}
@@ -215,11 +263,12 @@ export default function ProjectDetailsPage({ projectId }) {
       {showVerificationModal && (
         <OTPVerificationModal
           isOpen={showVerificationModal}
-          onClose={handleVerificationModal}
+          onClose={() => setShowVerificationModal((prev) => !prev)}
           title='Get Callback for'
           subtitle={projectData?.name}
           callBackTime={projectData?.callback_time}
           projectId={projectData?.id}
+          phoneNumber={phoneNumber}
         />
       )}
     </>

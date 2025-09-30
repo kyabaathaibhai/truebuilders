@@ -12,6 +12,8 @@ import {
   Shield,
   User,
   MessageSquare,
+  X,
+  Menu,
 } from 'lucide-react';
 import Logo from 'assets/Logo';
 import Link from 'next/link';
@@ -23,12 +25,14 @@ import { OtpService } from '@lib/OtpService';
 import Loader from './Loader';
 import OTPVerificationModal from './OtpVerificationModal';
 import { event } from '@lib/gtag';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   isLanding?: boolean;
 }
 
 function HomePage({ isLanding = true }: Props) {
+  const router = useRouter();
   const [builderData, setBuilderData] = useState<any>([]);
   const [projectData, setProjectData] = useState<any>([]);
   const [autocompleteData, setAutocompleteData] = useState<any>([]);
@@ -48,6 +52,8 @@ function HomePage({ isLanding = true }: Props) {
   const [error, setError] = useState('');
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   async function fetchBuilderList() {
     try {
@@ -114,6 +120,16 @@ function HomePage({ isLanding = true }: Props) {
     setValue(selectedValue);
     handleInputChange('projectName', item.label);
     handleInputChange('project_id', item.id);
+  };
+
+  const handleAutocompleteSelectInHeader = (selectedValue: any, item: any) => {
+    if (!item) return;
+    setSearchValue(selectedValue);
+    if (item.type === 'project') {
+      router.push(`/project/${item.id}`);
+    } else if (item.type == 'builder') {
+      router.push(`/builder/${item.id}`);
+    }
   };
 
   const filterAutocompleteItems = (items: any[], value: string) => {
@@ -295,13 +311,16 @@ function HomePage({ isLanding = true }: Props) {
         <header className='bg-white shadow-sm border-b border-gray-100'>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='flex justify-between items-center h-16'>
-              <Link href='/' className='flex items-center'>
+              {/* Logo */}
+              <a href='/' className='flex items-center gap-2 flex-shrink-0'>
                 <Logo />
-                <span className='text-2xl font-bold text-gray-900'>
+                <span className='text-xl sm:text-2xl font-bold text-gray-900'>
                   TrueBuilders
                 </span>
-              </Link>
-              <nav className='hidden md:flex space-x-8'>
+              </a>
+
+              {/* Desktop Navigation */}
+              <nav className='hidden lg:flex items-center gap-8'>
                 <a
                   href='#builders'
                   className='text-gray-700 hover:text-blue-600 transition-colors'
@@ -327,7 +346,200 @@ function HomePage({ isLanding = true }: Props) {
                   Contact
                 </a>
               </nav>
+
+              {/* Desktop Search */}
+              <div className='hidden lg:block w-80'>
+                <div className='relative'>
+                  <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10' />
+                  <Autocomplete
+                    getItemValue={(item) => item.label}
+                    items={filterAutocompleteItems(autocompleteData, value)}
+                    renderItem={(item, isHighlighted) => (
+                      <div
+                        className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                          isHighlighted ? 'bg-blue-50' : 'bg-white'
+                        } hover:bg-blue-50`}
+                      >
+                        <div className='flex items-center justify-between'>
+                          <div>
+                            <div className='font-semibold text-gray-900 text-left'>
+                              {item.label}
+                            </div>
+                            <div className='text-sm text-gray-600 text-left'>
+                              {item.subtitle}
+                            </div>
+                          </div>
+                          <div
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              item.type === 'builder'
+                                ? 'bg-blue-100 text-blue-800'
+                                : item.type === 'project'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {item.type === 'builder'
+                              ? 'Builder'
+                              : item.type === 'project'
+                              ? 'Project'
+                              : 'Custom'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    renderMenu={(items, value, style) => {
+                      if (!value && items.length === 0) return null;
+                      return (
+                        <div
+                          className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
+                          style={{ top: '100%', zIndex: '1000000' }}
+                        >
+                          {items}
+                        </div>
+                      );
+                    }}
+                    wrapperStyle={{
+                      position: 'relative',
+                      display: 'block',
+                      width: '100%',
+                    }}
+                    wrapperProps={{
+                      className: 'relative w-full',
+                    }}
+                    inputProps={{
+                      placeholder: 'Search...',
+                      className:
+                        'w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    }}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    onSelect={handleAutocompleteSelectInHeader}
+                    menuStyle={{}}
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                className='lg:hidden p-2 text-gray-700 hover:text-blue-600'
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? (
+                  <X className='h-6 w-6' />
+                ) : (
+                  <Menu className='h-6 w-6' />
+                )}
+              </button>
             </div>
+
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+              <div className='lg:hidden py-4 border-t border-gray-100'>
+                {/* Mobile Search */}
+                <div className='mb-4'>
+                  <div className='relative'>
+                    <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10' />
+                    <Autocomplete
+                      getItemValue={(item) => item.label}
+                      items={filterAutocompleteItems(autocompleteData, value)}
+                      renderItem={(item, isHighlighted) => (
+                        <div
+                          className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                            isHighlighted ? 'bg-blue-50' : 'bg-white'
+                          } hover:bg-blue-50`}
+                        >
+                          <div className='flex items-center justify-between'>
+                            <div>
+                              <div className='font-semibold text-gray-900 text-left'>
+                                {item.label}
+                              </div>
+                              <div className='text-sm text-gray-600 text-left'>
+                                {item.subtitle}
+                              </div>
+                            </div>
+                            <div
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                item.type === 'builder'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : item.type === 'project'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                            >
+                              {item.type === 'builder'
+                                ? 'Builder'
+                                : item.type === 'project'
+                                ? 'Project'
+                                : 'Custom'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      renderMenu={(items, value, style) => {
+                        if (!value && items.length === 0) return null;
+                        return (
+                          <div
+                            className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
+                            style={{ top: '100%', zIndex: '1000000' }}
+                          >
+                            {items}
+                          </div>
+                        );
+                      }}
+                      wrapperStyle={{
+                        position: 'relative',
+                        display: 'block',
+                        width: '100%',
+                      }}
+                      wrapperProps={{
+                        className: 'relative w-full',
+                      }}
+                      inputProps={{
+                        placeholder: 'Search for builders or projects',
+                        className:
+                          'w-full pl-10 pr-4 py-3 text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                      }}
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      onSelect={handleAutocompleteSelectInHeader}
+                      menuStyle={{}}
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile Navigation Links */}
+                <nav className='flex flex-col space-y-3'>
+                  <a
+                    href='#builders'
+                    className='text-gray-700 hover:text-blue-600 transition-colors py-2'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Builders
+                  </a>
+                  <a
+                    href='#projects'
+                    className='text-gray-700 hover:text-blue-600 transition-colors py-2'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Projects
+                  </a>
+                  <a
+                    href='#about'
+                    className='text-gray-700 hover:text-blue-600 transition-colors py-2'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </a>
+                  <a
+                    href='#contact'
+                    className='text-gray-700 hover:text-blue-600 transition-colors py-2'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Contact
+                  </a>
+                </nav>
+              </div>
+            )}
           </div>
         </header>
 
@@ -514,7 +726,7 @@ function HomePage({ isLanding = true }: Props) {
                                   return (
                                     <div
                                       className='absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50 mt-1'
-                                      style={{ top: '100%' }}
+                                      style={{ top: '100%', zIndex: '1000000' }}
                                     >
                                       {items}
                                     </div>

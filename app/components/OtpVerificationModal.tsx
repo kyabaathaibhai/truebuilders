@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Phone, User, MessageSquare, CheckCircle, X } from 'lucide-react';
 import { OtpService } from '@lib/OtpService';
 import { event } from '@lib/gtag';
@@ -14,6 +14,8 @@ interface OTPVerificationModalProps {
   projectId?: number;
   callBackTime?: number;
   showMessageInput?: boolean;
+  phoneNumber?: string;
+  name?: string;
 }
 
 const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
@@ -25,11 +27,15 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   callBackTime = 30,
   subtitle = 'TrueBuilders',
   showMessageInput = false,
+  phoneNumber = '',
+  name = '',
 }) => {
-  const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
+  const [step, setStep] = useState<'form' | 'otp' | 'success'>(
+    phoneNumber ? 'otp' : 'form'
+  );
   const [formData, setFormData] = useState({
-    name: '',
-    phoneNumber: '',
+    name: name,
+    phoneNumber: phoneNumber,
   });
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -300,7 +306,13 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
               <div className='text-center'>
                 <button
                   type='button'
-                  onClick={() => setStep('form')}
+                  onClick={() => {
+                    if (phoneNumber) {
+                      onClose();
+                    } else {
+                      setStep('form');
+                    }
+                  }}
                   className='text-blue-600 hover:text-blue-700 text-sm font-medium'
                   disabled={loading}
                 >

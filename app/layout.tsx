@@ -29,19 +29,22 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Skip broker commission. Connect directly with builders.',
+  title: {
+    default: 'TrueBuilders',
+    template: '%s | TrueBuilders',
+  },
   description: 'Skip broker commission. Connect directly with builders.',
   openGraph: {
-    title: 'Skip broker commission. Connect directly with builders.',
+    title: 'TrueBuilders',
     description: 'Skip broker commission. Connect directly with builders.',
-    url: 'https://truebuilders.vercel.app',
+    url: 'https://truebuilders.co.in',
     siteName: 'TrueBuilders',
     images: [
       {
-        url: 'https://truebuilders.vercel.app/ogImage.png', // 👈 upload an image here
+        url: '/ogImage.png', // keep this in /public
         width: 1200,
         height: 630,
-        alt: 'Skip broker commission. Connect directly with builders.',
+        alt: 'TrueBuilders - Skip broker commission',
       },
     ],
     locale: 'en_US',
@@ -49,12 +52,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Skip broker commission. Connect directly with builders.',
+    title: 'TrueBuilders',
     description: 'Skip broker commission. Connect directly with builders.',
-    images: ['https://truebuilders.vercel.app/ogImage.png'],
+    images: ['/ogImage.png'],
   },
   icons: {
     icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 };
 
