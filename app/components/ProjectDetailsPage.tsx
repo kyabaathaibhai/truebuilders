@@ -12,6 +12,8 @@ import { OtpService } from '@lib/OtpService';
 
 export default function ProjectDetailsPage({ projectId }) {
   const [projectData, setProjectData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [error, setError] = useState<string>('');
 
@@ -37,6 +39,7 @@ export default function ProjectDetailsPage({ projectId }) {
         setError('Please enter a valid phone number');
         return;
       }
+      setLoading(true);
       let payload = {
         name: '',
         phone_number: phoneNumber,
@@ -55,6 +58,7 @@ export default function ProjectDetailsPage({ projectId }) {
         action: 'get_callback_project_cta_clicked',
         project_id: projectId,
       });
+      setLoading(false);
     }
   };
 
@@ -191,6 +195,7 @@ export default function ProjectDetailsPage({ projectId }) {
                   onClick={() => {
                     requestOTP();
                   }}
+                  disabled={loading}
                 >
                   Get Callback from Builder
                 </button>
