@@ -124,12 +124,13 @@ function HomePage({ isLanding = true }: Props) {
 
   const handleAutocompleteSelectInHeader = (selectedValue: any, item: any) => {
     if (!item) return;
-    setSearchValue(selectedValue);
     if (item.type === 'project') {
       router.push(`/project/${item.id}`);
     } else if (item.type == 'builder') {
       router.push(`/builder/${item.id}`);
     }
+    setSearchValue('');
+    setMobileMenuOpen(false);
   };
 
   const filterAutocompleteItems = (items: any[], value: string) => {
@@ -353,7 +354,10 @@ function HomePage({ isLanding = true }: Props) {
                   <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10' />
                   <Autocomplete
                     getItemValue={(item) => item.label}
-                    items={filterAutocompleteItems(autocompleteData, value)}
+                    items={filterAutocompleteItems(
+                      autocompleteData,
+                      searchValue
+                    )}
                     renderItem={(item, isHighlighted) => (
                       <div
                         className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
@@ -412,7 +416,9 @@ function HomePage({ isLanding = true }: Props) {
                         'w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                     }}
                     value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchValue(e.target.value)
+                    }
                     onSelect={handleAutocompleteSelectInHeader}
                     menuStyle={{}}
                   />
@@ -441,7 +447,10 @@ function HomePage({ isLanding = true }: Props) {
                     <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10' />
                     <Autocomplete
                       getItemValue={(item) => item.label}
-                      items={filterAutocompleteItems(autocompleteData, value)}
+                      items={filterAutocompleteItems(
+                        autocompleteData,
+                        searchValue
+                      )}
                       renderItem={(item, isHighlighted) => (
                         <div
                           className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
@@ -500,7 +509,9 @@ function HomePage({ isLanding = true }: Props) {
                           'w-full pl-10 pr-4 py-3 text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                       }}
                       value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSearchValue(e.target.value)
+                      }
                       onSelect={handleAutocompleteSelectInHeader}
                       menuStyle={{}}
                     />
