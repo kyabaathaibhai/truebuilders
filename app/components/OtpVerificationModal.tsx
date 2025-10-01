@@ -218,7 +218,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                     onChange={(e) =>
                       handleInputChange('phoneNumber', e.target.value)
                     }
-                    placeholder='+91 98765 43210'
+                    placeholder='98765 43210'
                     className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                     disabled={loading}
                   />
