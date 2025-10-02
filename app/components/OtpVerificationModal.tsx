@@ -1,7 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Phone, User, MessageSquare, CheckCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Phone,
+  User,
+  MessageSquare,
+  CheckCircle,
+  X,
+  Shield,
+  Award,
+  Users,
+} from 'lucide-react';
 import { OtpService } from '@lib/OtpService';
 import { event } from '@lib/gtag';
 
@@ -16,6 +25,7 @@ interface OTPVerificationModalProps {
   showMessageInput?: boolean;
   phoneNumber?: string;
   name?: string;
+  step?: 'form' | 'otp' | 'success';
 }
 
 const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
@@ -29,10 +39,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   showMessageInput = false,
   phoneNumber = '',
   name = '',
+  step: initialStep = 'form',
 }) => {
-  const [step, setStep] = useState<'form' | 'otp' | 'success'>(
-    phoneNumber ? 'otp' : 'form'
-  );
+  // Initialize step based on prop or default to form
+  const [step, setStep] = useState<'form' | 'otp' | 'success'>(initialStep);
   const [formData, setFormData] = useState({
     name: name,
     phoneNumber: phoneNumber,
@@ -349,6 +359,21 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
             </button>
           </div>
         )}
+
+        <div className='flex flex-wrap justify-start gap-3 justify-center mt-6'>
+          <div className='flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full'>
+            <Shield className='h-3 w-3' />
+            <span className='font-medium text-xs'>Zero data sharing</span>
+          </div>
+          <div className='flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full'>
+            <Award className='h-3 w-3' />
+            <span className='font-medium text-xs'>GDPR compliant</span>
+          </div>
+          <div className='flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full'>
+            <Users className='h-3 w-3' />
+            <span className='font-medium text-xs'>No brokers in the loop</span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 'use client';
 import { ProjectService } from '@lib/ProjectService';
 import Logo from 'assets/Logo';
-import { MapPin, Phone } from 'lucide-react';
+import { Award, MapPin, Phone, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import OTPVerificationModal from './OtpVerificationModal';
 import Loader from './Loader';
 import { event } from '@lib/gtag';
@@ -19,6 +19,9 @@ export default function ProjectDetailsPage({ projectId }) {
 
   const [showVerificationModal, setShowVerificationModal] =
     useState<boolean>(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  // Persistent ref to track if modal has been shown during this session
+  const hasShownModalRef = useRef<boolean>(false);
   async function fetchBuilderDetails() {
     try {
       const list = await ProjectService.getProjectDetails(projectId);
@@ -45,9 +48,10 @@ export default function ProjectDetailsPage({ projectId }) {
         phone_number: phoneNumber,
         project_id: projectId,
       };
-      const response = await OtpService.requestOtp(payload);
+      await OtpService.requestOtp(payload);
       setError('');
-      setShowVerificationModal((prev) => !prev);
+      hasShownModalRef.current = false;
+      setShowVerificationModal(true);
     } catch (error) {
       setError(
         error.message ||
@@ -65,6 +69,40 @@ export default function ProjectDetailsPage({ projectId }) {
   useEffect(() => {
     if (projectId) fetchBuilderDetails();
   }, [projectId]);
+
+  // Set up intersection observer to detect when user scrolls to extreme bottom
+  useEffect(() => {
+    // Only set up observer if project data is loaded and bottomRef exists
+    if (!bottomRef.current || !projectData) return;
+
+    const options = {
+      root: null, // Use the viewport as the root
+      rootMargin: '0px', // No margin to ensure we're at the extreme bottom
+      threshold: 0.9, // Trigger only when almost fully visible (extreme bottom)
+    };
+
+    const handleIntersection = (entries) => {
+      const [entry] = entries;
+
+      // Only show modal if it's intersecting, not already shown during this session, and not already open
+      if (
+        entry.isIntersecting &&
+        !hasShownModalRef.current &&
+        !showVerificationModal
+      ) {
+        console.log('Extreme bottom of page reached, showing OTP modal');
+        setShowVerificationModal(true);
+        hasShownModalRef.current = true; // Mark as shown to prevent multiple triggers across renders
+      }
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, options);
+    observer.observe(bottomRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [projectData, showVerificationModal]); // Include showVerificationModal to prevent showing if already open
 
   if (!projectData) {
     return <Loader />;
@@ -93,20 +131,77 @@ export default function ProjectDetailsPage({ projectId }) {
           </div>
         </header>
 
-        {/* Project Gallery */}
-        <div className='relative'>
-          <Image
-            src={projectData?.hero_section?.heroImage}
-            alt={`${projectData.name}`}
-            className={`w-full object-cover h-96`}
-            height={100}
-            width={100}
-            unoptimized
-          />
+        {/* Project Gallery and Callback */}
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+            {/* Hero Image */}
+            <div className='lg:col-span-2 relative'>
+              <Image
+                src={projectData?.hero_section?.heroImage}
+                alt={`${projectData.name}`}
+                className={`w-full object-cover h-96 rounded-xl`}
+                height={100}
+                width={100}
+                unoptimized
+              />
+            </div>
+
+            {/* Builder Callback Container */}
+            <div className='lg:col-span-1'>
+              <div className='bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-4 h-full justify-center'>
+                <h3 className='text-2xl font-bold text-gray-900 mb-2 text-center'>
+                  Get callback from builder in 30mins
+                </h3>
+                <div className='relative'>
+                  <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
+                  <input
+                    type='tel'
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder='98765 43210'
+                    className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  />
+                </div>
+                {error && (
+                  <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm'>
+                    {error}
+                  </div>
+                )}
+                <button
+                  className='w-full text-lg font-medium google-signin-button text-white items-center justify-center rounded-full py-2 relative z-10 transition-all duration-300 h:12 md:h-16 px-10'
+                  onClick={() => {
+                    requestOTP();
+                  }}
+                  disabled={loading}
+                >
+                  Get Callback from Builder
+                </button>
+
+                <div className='flex flex-wrap justify-start gap-3 justify-center'>
+                  <div className='flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full'>
+                    <Shield className='h-3 w-3' />
+                    <span className='font-medium text-xs'>
+                      Zero data sharing
+                    </span>
+                  </div>
+                  <div className='flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full'>
+                    <Award className='h-3 w-3' />
+                    <span className='font-medium text-xs'>GDPR compliant</span>
+                  </div>
+                  <div className='flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full'>
+                    <Users className='h-3 w-3' />
+                    <span className='font-medium text-xs'>
+                      No brokers in the loop
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Project Details */}
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
             {/* Main Content */}
             <div className='lg:col-span-2'>
@@ -174,32 +269,6 @@ export default function ProjectDetailsPage({ projectId }) {
 
             {/* Sidebar */}
             <div className='lg:col-span-1 flex flex-col gap-4 items-left'>
-              <div className='bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-4'>
-                <div className='relative'>
-                  <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
-                  <input
-                    type='tel'
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder='98765 43210'
-                    className='w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  />
-                </div>
-                {error && (
-                  <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm'>
-                    {error}
-                  </div>
-                )}
-                <button
-                  className='w-full text-lg font-medium google-signin-button text-white items-center justify-center rounded-full py-2 relative z-10 transition-all duration-300 h:12 md:h-16 px-10'
-                  onClick={() => {
-                    requestOTP();
-                  }}
-                  disabled={loading}
-                >
-                  Get Callback from Builder
-                </button>
-              </div>
               <div className='bg-white border border-gray-200 rounded-xl p-6'>
                 <div className='text-3xl font-bold text-gray-900 mb-6'>
                   {projectData?.project_snapshot?.price_starting_from}
@@ -264,16 +333,27 @@ export default function ProjectDetailsPage({ projectId }) {
             </div>
           </div>
         </div>
+        {/* Bottom ref element to detect scroll only at extreme bottom */}
+        <div
+          ref={bottomRef}
+          className='h-1 w-full'
+          style={{ marginBottom: '0' }}
+        ></div>
       </div>
       {showVerificationModal && (
         <OTPVerificationModal
           isOpen={showVerificationModal}
-          onClose={() => setShowVerificationModal((prev) => !prev)}
+          onClose={() => {
+            // Only close the modal, don't reset the hasShownModalRef
+            setShowVerificationModal(false);
+          }}
           title='Get Callback for'
           subtitle={projectData?.name}
           callBackTime={projectData?.callback_time}
           projectId={projectData?.id}
           phoneNumber={phoneNumber}
+          // If the modal is triggered by button click (not scroll), we should have already requested OTP
+          step={phoneNumber && !hasShownModalRef.current ? 'otp' : 'form'}
         />
       )}
     </>
