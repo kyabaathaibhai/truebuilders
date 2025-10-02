@@ -207,8 +207,8 @@ export default function ProjectDetailsPage({ projectId }) {
             <div className='lg:col-span-2'>
               <div className='flex items-start justify-between mb-6'>
                 <div>
-                  <div className='flex gap-2 items-center'>
-                    <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+                  <div className='flex gap-2 items-center mb-2'>
+                    <h1 className='text-3xl font-bold text-gray-900 '>
                       {projectData?.name}
                     </h1>
                     <div className='bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
