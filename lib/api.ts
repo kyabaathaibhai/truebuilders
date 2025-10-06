@@ -71,7 +71,7 @@ api.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - redirect to login
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
           break;
         case 403:
           // Forbidden
