@@ -132,26 +132,64 @@ export default function ProjectDetailsPage({ projectId }) {
         </header>
 
         {/* Project Gallery and Callback */}
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 md:gap-8 gap-4'>
             {/* Hero Image */}
             <div className='lg:col-span-2 relative'>
               <Image
                 src={projectData?.hero_section?.heroImage}
                 alt={`${projectData.name}`}
-                className={`w-full object-cover h-96 rounded-xl`}
+                className={`w-full object-cover h-80 lg:h-96 rounded-xl`}
                 height={100}
                 width={100}
                 unoptimized
               />
+
+              {/* Mobile Heading: Project & Builder - Below Hero Image */}
+              <div className='block lg:hidden mt-4'>
+                <div className='bg-white border border-gray-200 rounded-xl p-4'>
+                  <h1 className='text-xl font-bold text-gray-900 mb-1'>
+                    {projectData?.name}
+                  </h1>
+                  <p className='text-sm text-gray-600'>
+                    By{' '}
+                    <Link
+                      href={`/builder/${projectData?.builder_id}`}
+                      className='font-semibold text-indigo-600 hover:text-indigo-500 transition-colors'
+                    >
+                      {projectData?.builder_name}
+                    </Link>
+                  </p>
+                  <div className='flex items-center space-x-1 text-xs text-gray-500 mt-2'>
+                    <MapPin className='h-3 w-3' />
+                    <span>{projectData?.location_address}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Builder Callback Container */}
             <div className='lg:col-span-1'>
-              <div className='bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-4 h-full justify-center'>
+              <div className='bg-white border border-gray-200 rounded-xl p-4 lg:p-6 flex flex-col gap-3 lg:gap-4 h-full justify-center'>
                 <h3 className='text-2xl font-bold text-gray-900 mb-2 text-center'>
                   Get callback from builder in 30mins
                 </h3>
+                {/* Mobile-only: Configuration available inside the form */}
+                <div className='flex flex-wrap gap-2 lg:hidden'>
+                  <div className='text-sm text-gray-700 mb-2 font-medium'>
+                    Configuration available:
+                  </div>
+                  <div className='flex flex-wrap gap-2 mb-2'>
+                    {projectData?.unit_types?.map((type: string) => (
+                      <span
+                        key={type}
+                        className='bg-[#c7a63d]/10 text-[#c7a63d] px-2 py-1 rounded-lg text-xs font-semibold border border-[#c7a63d]/30'
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
                 <div className='relative'>
                   <Phone className='absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400' />
                   <input
@@ -202,13 +240,13 @@ export default function ProjectDetailsPage({ projectId }) {
 
         {/* Project Details */}
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 md:gap-8 gap-4'>
             {/* Main Content */}
             <div className='lg:col-span-2'>
               <div className='flex items-start justify-between mb-6'>
                 <div>
                   <div className='flex gap-2 items-center mb-2'>
-                    <h1 className='text-3xl font-bold text-gray-900 '>
+                    <h1 className='hidden lg:block text-3xl font-bold text-gray-900 '>
                       {projectData?.name}
                     </h1>
                     <div className='bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>
@@ -216,7 +254,7 @@ export default function ProjectDetailsPage({ projectId }) {
                     </div>
                   </div>
 
-                  <p className='text-base text-gray-700 mb-3'>
+                  <p className='hidden lg:block text-base text-gray-700 mb-3'>
                     By{' '}
                     <Link
                       href={`/builder/${projectData?.builder_id}`}
