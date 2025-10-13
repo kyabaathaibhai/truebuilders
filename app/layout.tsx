@@ -37,11 +37,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'TrueBuilders',
     description: 'Skip broker commission. Connect directly with builders.',
-    url: 'https://truebuilders.co.in',
+    url: 'https://truebuilders.in',
     siteName: 'TrueBuilders',
     images: [
       {
-        url: 'https://truebuilders.co.in/ogImage.png', // keep this in /public
+        url: 'https://truebuilders.in/ogImage.png', // keep this in /public
         width: 1200,
         height: 630,
         alt: 'TrueBuilders - Skip broker commission',
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TrueBuilders',
     description: 'Skip broker commission. Connect directly with builders.',
-    images: ['https://truebuilders.co.in/ogImage.png'],
+    images: ['https://truebuilders.in/ogImage.png'],
   },
   icons: {
     icon: '/favicon.svg',

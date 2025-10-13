@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   try {
-    const res = await fetch(`https://api.truebuilders.co.in/api/projects/${id}?nonce=${Date.now()}`, {
+    const res = await fetch(`https://api.truebuilders.in/api/projects/${id}?nonce=${Date.now()}`, {
       method: "GET",
       headers: {
         Authorization: authHeader,
